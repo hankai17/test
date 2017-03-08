@@ -1,0 +1,3 @@
+/root/test/dns/src/CMakeFiles/fakecli.dir
+/root/test/dns/src/CMakeFiles/fakesrv.dir
+/root/test/dns/src/CMakeFiles/unittests.dir

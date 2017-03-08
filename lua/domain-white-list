@@ -1,0 +1,17 @@
+group{
+    servers = {"111.13.111.233"},
+    domains = {
+            "www.wandoujia.com",
+            "www.gionee.com",
+            "www.vip.com",
+            "*.163.com",
+            "www.jd.com",
+        }
+}
+group{
+    servers = {"111.13.111.234"},
+    domains = {
+            "1.qtmojo.com",
+            "a1.alicdn.com",
+        }
+}

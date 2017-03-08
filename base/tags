@@ -1,0 +1,34 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+C	2namespace.cpp	/^}C;$/;"	t	typeref:struct:Class	file:
+Class	2namespace.cpp	/^typedef struct Class {$/;"	s	file:
+Class::a	2namespace.cpp	/^    int a;$/;"	m	struct:Class	file:	access:public
+Class::c	2namespace.cpp	/^    char c;$/;"	m	struct:Class	file:	access:public
+T	2namespace.cpp	/^}T;$/;"	t	typeref:struct:Test	file:
+Test	2namespace.cpp	/^typedef struct Test {$/;"	s	file:
+Test::a	2namespace.cpp	/^    int a;$/;"	m	struct:Test	file:	access:public
+Test::c	2namespace.cpp	/^    char c;$/;"	m	struct:Test	file:	access:public
+__anon1::ns_char	2namespace.cpp	/^    char ns_char;$/;"	m	namespace:__anon1	file:
+__anon1::ns_char_ptr	2namespace.cpp	/^    char *ns_char_ptr;$/;"	m	namespace:__anon1	file:
+__anon1::ns_int	2namespace.cpp	/^    int ns_int; $/;"	m	namespace:__anon1	file:
+__anon2::data	1new_pro.cpp	/^    char * data;$/;"	m	struct:__anon2	file:	access:public
+__anon2::len	1new_pro.cpp	/^    size_t len;$/;"	m	struct:__anon2	file:	access:public
+a	2namespace.cpp	/^    int a;$/;"	m	struct:Class	file:	access:public
+a	2namespace.cpp	/^    int a;$/;"	m	struct:Test	file:	access:public
+c	2namespace.cpp	/^    char c;$/;"	m	struct:Class	file:	access:public
+c	2namespace.cpp	/^    char c;$/;"	m	struct:Test	file:	access:public
+data	1new_pro.cpp	/^    char * data;$/;"	m	struct:__anon2	file:	access:public
+icr_struct_t	1new_pro.cpp	/^}icr_struct_t;$/;"	t	typeref:struct:__anon2	file:
+len	1new_pro.cpp	/^    size_t len;$/;"	m	struct:__anon2	file:	access:public
+main	1new_pro.cpp	/^int main()$/;"	f	signature:()
+main	2namespace.cpp	/^int main()$/;"	f	signature:()
+main	3vim_test.c	/^int main()$/;"	f
+main1	1new_pro.cpp	/^int main1()$/;"	f	signature:()
+main1	2namespace.cpp	/^int main1()$/;"	f	signature:()
+ns_char	2namespace.cpp	/^    char ns_char;$/;"	m	namespace:__anon1	file:
+ns_char_ptr	2namespace.cpp	/^    char *ns_char_ptr;$/;"	m	namespace:__anon1	file:
+ns_int	2namespace.cpp	/^    int ns_int; $/;"	m	namespace:__anon1	file:

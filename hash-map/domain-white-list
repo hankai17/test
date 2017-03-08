@@ -1,0 +1,17 @@
+group{
+    servers = {"111.13.111.233","192.168.22.1"},
+    domains = {
+            "www.vip.com",
+            "*.163.com",
+        }
+}
+group{
+    servers = {"111.13.111.234", 这个是注释
+               "10.10.110.123" 
+                },
+    domains = {
+            "1.qtmojo.com",
+            "a1.alicdn.com",
+        }
+}
+
