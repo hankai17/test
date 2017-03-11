@@ -32,14 +32,14 @@
 
     There are two important concepts, the 'kernel' and the 'thread'. Each thread starts out as a function,
     which is passed to MTasker::makeThread(), together with a possible argument.
-    The kernel is written by the developer, but can be quite short.
+The kernel is written by the developer, but can be quite short.
 
-    This function is now free to do whatever it wants, but realise that MTasker implements cooperative
-    multitasking, which means that the coder has the responsiblilty of not taking the CPU overly long.
+This function is now free to do whatever it wants, but realise that MTasker implements cooperative
+multitasking, which means that the coder has the responsiblilty of not taking the CPU overly long.
     Other threads can only get the CPU if MTasker::yield() is called or if a thread sleeps to wait for an event, 
     using the MTasker::waitEvent() method.
 
-    \section kernel The Kernel
+\section kernel The Kernel
     The Kernel consists of functions that do housekeeping, but also of code that the client coder 
     can call to report events. A minimal kernel loop looks like this:
     \code
