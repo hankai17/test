@@ -302,68 +302,6 @@ void icscheck::curl_worker(void *argptr, int check_ip_index)
 
 char icscheck::curl_ics(std::string &chip)
 {
-	/*
-    //std::cout<<".........curl探测"<<std::endl;
-	char unRet = NO;
-
-	char url[1024] =  {0}; //"http://%s/img/bdlogo.gif";
-	char Host[500] = {0};
-	memcpy(Host, "Host: www.17dao.com", strlen("Host: www.17dao.com"));
-	//sprintf(url, "http://%s/noc/test1k", chip->data);
-	memcpy(url, "http://", 7);
-	memcpy(url+7, chip.data(), chip.length());
-	memcpy(url+7+chip.length(), "/noc/test1k", strlen("/noc/test1k"));
-
-    //std::cout<<".........url:"<<url<<std::endl;
-	CURL * curl = curl_easy_init(); //初始化
-
-	struct curl_slist *slist = NULL;
-	slist = curl_slist_append(slist, Host);
-
-	if (curl != NULL)
-	{
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-		curl_easy_setopt(curl, CURLOPT_HEADER, 0); //一并获取响应头
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
-		curl_easy_setopt(curl, CURLOPT_HTTPGET, 0); //Get 请求
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
-		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data); //receive data
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL); // write_data param
-
-		unRet = curl_easy_perform(curl);
-		if (CURLE_OK == unRet)
-		{
-			unRet = YES;
-			long code;
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-            std::cout<<chip<<" response code:"<<code<<std::endl;
-			if (code >= 400)
-			{
-               //int count=t_packetCache->domyWipePacketCache();
-               //std::cout<<"!!!!!!!!!!!!!!clear all cache over"<<std::endl; 
-               //std::cout<<"!!!!!!!!!!!!!!count:"<<count<<std::endl; 
-				unRet = NO;
-			}
-		}
-		else
-		{
-			unRet = NO;
-		}
-
-        if( unRet == NO)
-        {
-            clear_flag = 1;
-            std::cout<<"curl... clear_flag: "<<clear_flag<<std::endl; 
-        }
-		curl_easy_cleanup(curl);
-	}
-
-	curl_slist_free_all(slist);
-
-	return unRet;
-	*/
 	char unRet = NO;
 
 	char url[1024] =  {0}; //"http://%s/img/bdlogo.gif";
