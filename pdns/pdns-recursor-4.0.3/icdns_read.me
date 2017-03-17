@@ -1,0 +1,14 @@
+注意:
+    所有配置文件:domain-white-list domain-black-list 和 pdns.conf文件 均放在 /usr/local/etc 目录下
+    ics探测发送邮件目录是 /etc/icrskice 邮件名称为sdmail.pl
+    所有文件均未编译,编译时需要注意: 
+    1 修改Makefile.am文件, 在 pdns_recursor_SOURCES 目录下添加
+      icr_icscheck.cc icr_icscheck.hh  conf.cc conf.hh 4个文件名称,并保存
+    2 依次执行以下命令:
+      autoconf
+      autoreconf
+      automake
+      ./configure LDFLAGS=-lcurl
+      make
+    3 得到 pdns_recursor 可运行程序,运行即可
+
