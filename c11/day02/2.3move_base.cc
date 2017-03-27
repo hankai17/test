@@ -62,3 +62,5 @@ destruct
 destruct
 [root@90-20 day02]# 
 */
+
+//move 可以省去拷贝成匿名 也就是说move代替了所有的拷贝 
