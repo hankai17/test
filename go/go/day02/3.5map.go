@@ -10,15 +10,15 @@ type PersonInfo struct {
 }
 
 func main() {
-	var personDB map[string] PersonInfo
-	personDB = make(map[string] PersonInfo)
+	var personDB map[string] PersonInfo //声明
+	personDB = make(map[string] PersonInfo) //创建
 	
 	// 往这个 map 里插入几条数据
 	personDB["12345"] = PersonInfo{"12345", "Tom", "Room 203,..."}
 	personDB["1"] = PersonInfo{"1", "Jack", "Room 101,..."}
 	
 	// 从这个 map 查找 key 为"1234"的信息
-	person, ok := personDB["1234"]
+	person, ok := personDB["1234"] //返回的是键值对 value+bool
 	
 	// ok 是一个返回的 bool 型,返回 true 表示找到了对应的数据
 	if ok {
