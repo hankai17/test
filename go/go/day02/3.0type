@@ -117,6 +117,3 @@
         copy(slice2, slice1) //拷贝1的前3个元素 
         copy(slice1, slice2)  //同上
 
-
-
-
