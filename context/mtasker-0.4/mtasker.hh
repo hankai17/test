@@ -16,9 +16,9 @@
 template<class EventKey=int, class EventVal=int> class MTasker
 {
 private:
-  ucontext_t d_kernel;     
-  std::queue<int> d_runQueue;
-  std::queue<int> d_zombiesQueue;
+  ucontext_t d_kernel; //上下文 
+  std::queue<int> d_runQueue; //运行队列
+  std::queue<int> d_zombiesQueue; //僵尸队列
 
   struct Waiter
   {
@@ -27,14 +27,14 @@ private:
     int tid;
   };
 
-  typedef std::map<EventKey,Waiter> waiters_t;
+  typedef std::map<EventKey,Waiter> waiters_t; //服务员是map容器 key为传入参数 val为上下文指针
   waiters_t d_waiters;
-  std::map<int,ucontext_t*> d_threads;
+  std::map<int,ucontext_t*> d_threads; //"线程(上下文)"map容器 即"线程" //与服务员好像
   int d_tid;
   int d_maxtid;
   size_t d_stacksize;
 
-  EventVal d_waitval;
+  EventVal d_waitval; //val是传入的第二个参数
   enum {Error=-1,TimeOut=0,Answer} d_waitstatus;
 
 public:

@@ -164,8 +164,9 @@ template<class EventKey, class EventVal>int MTasker<EventKey,EventVal>::waitEven
 
 template<class Key, class Val>void MTasker<Key,Val>::yield()
 {
-  d_runQueue.push(d_tid);
+  d_runQueue.push(d_tid); //把当前tid"线程"push到运行队列尾部
   swapcontext(d_threads[d_tid],&d_kernel); // give control to the kernel
+                                            //切换到内核上下文(而此时的内核上下文是240行 后schedule函数返回 再次在schedule中大循环) 保存当前上下文到后继上下文(注意：此时的后继上下文是：167行那个"线程"的上下文 . 正是这个地方实现了线程切换)
 }
 
 //! reports that an event took place for which threads may be waiting
@@ -201,20 +202,22 @@ template<class EventKey, class EventVal>int MTasker<EventKey,EventVal>::sendEven
 */
 template<class Key, class Val>void MTasker<Key,Val>::makeThread(tfunc_t *start, void* val)
 {
-  ucontext_t *uc=new ucontext_t;
-  getcontext(uc);
+  ucontext_t *uc=new ucontext_t; //new一个上下文
+  getcontext(uc); //获取当前上下文
   
   uc->uc_link = &d_kernel; // come back to kernel after dying
-  uc->uc_stack.ss_sp = new char[d_stacksize];
+                            //设置后继上下文 为内核上下文(有种传入参数的味道)
+  uc->uc_stack.ss_sp = new char[d_stacksize]; 
   
   uc->uc_stack.ss_size = d_stacksize;
 #ifdef SOLARIS
-  makecontext (uc, (void (*)(...))threadWrapper, 4, this, start, d_maxtid, val);
+  makecontext (uc, (void (*)(...))threadWrapper, 4, this, start, d_maxtid, val); //修改上下文指向threadWrapper函数
 #else
   makecontext (uc, (void (*)(void))threadWrapper, 4, this, start, d_maxtid, val);
 #endif
-  d_threads[d_maxtid]=uc;
+  d_threads[d_maxtid]=uc; //保存此上下文到 线程map容器中
   d_runQueue.push(d_maxtid++); // will run at next schedule invocation
+                                //把此上下文key值 push到运行队列中
 }
 
 
@@ -228,13 +231,14 @@ template<class Key, class Val>void MTasker<Key,Val>::makeThread(tfunc_t *start, 
     \return Returns if there is more work scheduled and recalling schedule now would be useful
       
 */
+//上面的上下文 和 回调设置好后 再调用调度器
 template<class Key, class Val>bool MTasker<Key,Val>::schedule()
 {
 
-  if(!d_runQueue.empty()) {
-    d_tid=d_runQueue.front();
-    swapcontext(&d_kernel, d_threads[d_tid]);
-    d_runQueue.pop();
+  if(!d_runQueue.empty()) { //运行队列不空，取头"tid" 根据tid找到线程map容器相应的 "线程" 
+    d_tid=d_runQueue.front(); //获得对头元素
+    swapcontext(&d_kernel, d_threads[d_tid]); //切换到此上下文运行，保存当前上下文到内核上下文 
+    d_runQueue.pop();  //对头运行完了 弹出对头
     return true;
   }
   if(!d_zombiesQueue.empty()) {

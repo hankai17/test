@@ -10,7 +10,7 @@ void printer(void *p)
   char c=(char)p;
   for(;;) {
     cout<<c<<endl;
-    MT.yield();
+    MT.yield(); //如果注释掉 则只打印出a 
   }
 
 }
