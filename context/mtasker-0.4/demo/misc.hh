@@ -37,7 +37,7 @@ public:
   //! Add a group of Sockets that the caller wants to read from
   void addReaders(svect_t& readers)
   {
-    adds(readers, d_readers);
+    adds(readers, d_readers); //前面的readers内容加到后面容器中
   }
   //! Add a group of Sockets that the caller wants to write to
   void addWriters(svect_t& readers)
@@ -72,7 +72,7 @@ public:
       \param writers An svect_t that will be filled with Sockets ready for writing
       \param errors An svect_t that will be filled with Sockets which have errors 
   */
-  void run(svect_t& readers, svect_t& writers, svect_t& errors)
+  void run(svect_t& readers, svect_t& writers, svect_t& errors) //添加这些集合 然后对其监听
   {
     fd_set rfds, wfds, efds;
     FD_ZERO(&rfds);
@@ -82,7 +82,7 @@ public:
     int maxfd=0;
     for(svect_t::const_iterator i=d_readers.begin();i!=d_readers.end();++i) {
       maxfd=max((*i)->getHandle(),maxfd);
-      FD_SET((*i)->getHandle(),&rfds);
+      FD_SET((*i)->getHandle(),&rfds); //往rfds集 里依次添加文件描述符
     }
     for(svect_t::const_iterator i=d_writers.begin();i!=d_writers.end();++i) {
       maxfd=max((*i)->getHandle(),maxfd);
@@ -100,7 +100,7 @@ public:
     if(res<0)
       throw NetworkError("Select: "+string(strerror(errno)));
 
-    readers.clear();
+    readers.clear(); //size变0 cap不变 内存不清空 
     writers.clear();
     errors.clear();
 
@@ -108,7 +108,7 @@ public:
       return;
       
     for(svect_t::const_iterator i=d_readers.begin();i!=d_readers.end();++i) 
-      if(FD_ISSET((*i)->getHandle(), &rfds))
+      if(FD_ISSET((*i)->getHandle(), &rfds)) //fd 是不是 rfds(传入传出)的一部分
 	readers.push_back(*i);
     
     for(svect_t::const_iterator i=d_writers.begin();i!=d_writers.end();++i) 

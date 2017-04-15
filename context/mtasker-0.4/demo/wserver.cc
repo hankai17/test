@@ -180,15 +180,15 @@ void connection(void *p)
 
 int main(int argc, char **argv)
 {
-  signal(SIGPIPE,SIG_IGN);
+  signal(SIGPIPE,SIG_IGN); //吊
   try {
     Socket s(InterNetwork, Stream); 
-    IPEndpoint ep;
+    IPEndpoint ep; //ip节点
     ep.address.byte=0;
     ep.port=8000;
     s.bind(ep);
     s.listen();
-    s.setNonBlocking();
+    s.setNonBlocking(); //socket非阻塞
     cerr<<"Bound to local port "<<ep.port<<endl;
 
     vector<WSEvent> waitevents;
@@ -198,19 +198,21 @@ int main(int argc, char **argv)
     for(;;) {
       while(MT.schedule());             // housekeeping, let threads run
 
-      SelectSocketMultiplex mult;
-      mult.addReader(&s);               // make sure we listen on the main socket
+      SelectSocketMultiplex mult; //文件描述符复用对象 
+      mult.addReader(&s);               // make sure we listen on the main socket //监听被动套接字 是否有连接到来 ,这一步只是
+					//挂到树上  当调用run时才真正select监听
       MT.getEvents(waitevents);         // get which events threads are waiting for
 
       /* add them to our SocketMultiplexor */
-      for(vector<WSEvent>::const_iterator i=waitevents.begin();i!=waitevents.end();++i)
+      for(vector<WSEvent>::const_iterator i=waitevents.begin();i!=waitevents.end();++i)  //遍历**事件 事件是读还是写 分别挂到
+			  //相应的集下 
 	if(i->what==WSEvent::Write) 
 	  mult.addWriter(i->who);
 	else if(i->what==WSEvent::Read) 
 	  mult.addReader(i->who);
 
       /* and see if anything interesting happened */
-      mult.run(readers,writers,errors);
+      mult.run(readers,writers,errors); //开始selet 监听
       
       if(count(readers.begin(),readers.end(),&s)==1 && (newClient=s.accept())) { // activity on the main socket
 	newClient->setNonBlocking();                                             // just in case
