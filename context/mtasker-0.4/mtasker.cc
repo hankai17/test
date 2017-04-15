@@ -145,16 +145,18 @@ int main()
 */
 template<class EventKey, class EventVal>int MTasker<EventKey,EventVal>::waitEvent(const EventKey &key, EventVal *val, unsigned int timeout)
 {
-  Waiter w;
+  Waiter w; //waiter里有一个上下文和tid waiter代表一个线程？
   w.context=new ucontext_t;
   w.ttd= timeout ? time(0)+timeout : 0;
   w.tid=d_tid;
   
-  d_waiters[key]=w;
+  d_waiters[key]=w; //把waiter线程 存放到与之对应的事件id 的map容器中
   
   swapcontext(d_waiters[key].context,&d_kernel); // 'A' will return here when 'key' has arrived, hands over control to kernel first
-  if(val && d_waitstatus==Answer) 
-    *val=d_waitval;
+                                                //因为是wait所以 切换到内核上下文
+                                                //保存当前上下文到后继上下文waiter中
+  if(val && d_waitstatus==Answer)  //判断 等待状态  
+    *val=d_waitval;                      //看过send之后还是有些模糊
   d_tid=w.tid;
   return d_waitstatus;
 }
@@ -175,7 +177,7 @@ template<class Key, class Val>void MTasker<Key,Val>::yield()
     \param val If non-zero, pointer to the content of the event
     \return Returns -1 in case of error, 0 if there were no waiters, 1 if a thread was woken up.
 */
-template<class EventKey, class EventVal>int MTasker<EventKey,EventVal>::sendEvent(const EventKey& key, const EventVal* val)
+template<class EventKey, class EventVal>int MTasker<EventKey,EventVal>::sendEvent(const EventKey& key, const EventVal* val) //默认val 为0
 {
   if(!d_waiters.count(key)) {
     return 0;
@@ -185,7 +187,7 @@ template<class EventKey, class EventVal>int MTasker<EventKey,EventVal>::sendEven
   if(val)
     d_waitval=*val;
   
-  ucontext_t *userspace=d_waiters[key].context;
+  ucontext_t *userspace=d_waiters[key].context; //因为发送的是key 根据key(tid)索引到相应的上下文 
   d_tid=d_waiters[key].tid;         // set tid 
   
   d_waiters.erase(key);             // removes the waitpoint 

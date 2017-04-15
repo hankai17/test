@@ -28,8 +28,8 @@ private:
   };
 
   typedef std::map<EventKey,Waiter> waiters_t; //服务员是map容器 key为传入参数 val为上下文指针
-  waiters_t d_waiters;
-  std::map<int,ucontext_t*> d_threads; //"线程(上下文)"map容器 即"线程" //与服务员好像
+  waiters_t d_waiters; //key:事件id val:waiter线程
+  std::map<int,ucontext_t*> d_threads; //"线程(上下文)"map容器 即"线程" //与服务员好像 // key:线程id val:线程上下文
   int d_tid;
   int d_maxtid;
   size_t d_stacksize;
