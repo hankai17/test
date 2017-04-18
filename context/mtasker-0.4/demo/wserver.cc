@@ -118,9 +118,9 @@ void connection(void *p)
   int chunksize=65000;          /* disk IO chunk to do at any one time */ //块大小
 
   vector<string> words;
-  BufferedIO bio(client); //根据主动套接字初始化一个io对象
+  BufferedIO bio(client); //根据主动套接字初始化一个io对象 io肯定有读写方法
 
-  try {
+  try { //解析客户端请求 非阻塞？  //这是重点 里面有事件 韩凯
     string line;
     bio.readLine(line); // GET line
     stringtok(words,line," \t\r\n");
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
     s.setNonBlocking(); //socket非阻塞
     cerr<<"Bound to local port "<<ep.port<<endl;
 
-    vector<WSEvent> waitevents;
+    vector<WSEvent> waitevents; //webserverevevt肯定有 读写 和 socket
     vector<Socket *>readers, writers,errors;
     Socket* newClient=0;
 
@@ -206,9 +206,12 @@ int main(int argc, char **argv)
       MT.getEvents(waitevents);         // get which events threads are waiting for
 					//喵喵喵？ //把MTasker中的d_waiters(map容器 key是事件id val是waiter结构) 遍历一遍 把事件id赋值给waitevents
 					//也就是说这里的事件id 即是socket结构体了
-
+					
+					//参数是等待事件 容器 是传出参数  每次调用都会在内部先
+					//清空此容器 
+//疑问： 一上来就获取事件  关键是 这些事件是在什么时机插入到MT内部的d_waiter map容器中的？？？
       /* add them to our SocketMultiplexor */
-      for(vector<WSEvent>::const_iterator i=waitevents.begin();i!=waitevents.end();++i)  //遍历socket结构体事件 事件是读还是写 分别挂到
+      for(vector<WSEvent>::const_iterator i=waitevents.begin();i!=waitevents.end();++i)  //遍历上面传出等待事件容器 事件是读还是写 分别挂到
 			  //相应的集下 
 	if(i->what==WSEvent::Write) 
 	  mult.addWriter(i->who);
@@ -219,12 +222,13 @@ int main(int argc, char **argv)
       mult.run(readers,writers,errors); //开始selet 监听 
 					//将结果socket结构体 push到mult的read/write/error
 					//容器中
+					//这里设计的跟select机制相同 也是传出参数
       //返回s出现的个数  
       //accept 返回第一个链接 
       if(count(readers.begin(),readers.end(),&s)==1 && (newClient=s.accept())) { // activity on the main socket
 	newClient->setNonBlocking();                                             // just in case
 	MT.makeThread(connection,(void *)newClient);                             // spawn new thread for newClient
-					//拿到一个新链接做什么？ 做connect()函数 韩凯
+					//拿到一个新链接做什么？ 先accept返回出主动套接字 再传参connect()函数 
       }
 
       WSEvent ws;
