@@ -70,16 +70,17 @@ schedule
     根据对头tid找相应上下文  保存当前上下文到kernel    ------kernel在242行处
     运行上下文指向的函数(threadWrapper) 开始回调函数 
         但是回调函数里有waitEvent
-        运行内核 保存当前上下文(map(key,上下文),此map是waitermap)  ------当前上下文在map里
-        因为运行内核 到242行处 tid弹出队列 return true 继续在while(schedule)
+        运行内核 保存当前上下文(map(key,上下文),此map是waitermap)  ------当前上下文(这个当前上下文在回调函数里)在map里
+        因为运行内核 到242行处 tid弹出队列 return true 继续在while(schedule) 连续10次弹出变为空
         ......所以看到了连续输出10行 Key handler for key * launched
 
     因为d_waiter容器不是空了 所以有超时判断  又因为传入0超时 所以没有超时(也就是说永久阻塞等待)
     schedule返回false 
 
     sendEvent 根据send的key值获取上下文(d_waiters) 
-    运行上下文 155行  此时状态为Answer
-    返回到305行 
+    运行上下文(继续回调函数) 155行  此时状态为Answer 并 得到tid
+    返回到305行 保存tid到僵尸队列(证明回调完成 一个线程/tid的完成)
+    然后再次跳到内核  ......
 
 
 
