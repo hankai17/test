@@ -1,0 +1,16 @@
+ab-example.cc
+	Example that prints the canonical 'a' and 'b' alternatingly
+
+menu-example.cc
+	Silly example where each option in a menu is a different task
+
+misc.hh
+	Contains a socket multiplexing class based on select. Also has
+	'stringtok' for tokenizing strings.
+
+sstuff.hh
+	'socket stuff'. Microsoft socket classes workalike, more or less
+
+wserver.cc
+	Nifty webserver based on MTasker, misc.hh and sstuff.hh
+	Has major performance problem but shows the principle
