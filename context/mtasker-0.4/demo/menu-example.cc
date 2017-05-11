@@ -74,7 +74,7 @@ schedule
         因为运行内核 到242行处 tid弹出队列 return true 继续在while(schedule) 连续10次弹出变为空
         ......所以看到了连续输出10行 Key handler for key * launched
 
-    因为d_waiter容器不是空了 所以有超时判断  又因为传入0超时 所以没有超时(也就是说永久阻塞等待)
+    因为d_waiter容器不是空了 所以有超时判断  又因为传入0超时 所以没有超时(也就是说不阻塞等待)
     schedule返回false 
 
     sendEvent 根据send的key值获取上下文(d_waiters) 
@@ -82,8 +82,10 @@ schedule
     返回到305行 保存tid到僵尸队列(证明回调完成 一个线程/tid的完成)
     然后再次跳到内核  ......
 
+也就是说先注册好10个tid 10个协程 
+schedule遍历 因为协程回调函数中有waitEvent函数 以key值保存当前环境到waitermap中 
+然后tid弹出队列 知道弹空返回false 运行自己的函数 
 
-
-
+自己的流程sendEvent  如果超时就删除
 
 */
