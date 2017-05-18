@@ -1,4 +1,0 @@
-给基类的析构函数加上virtual 它会自动调用继承类的析构 
-有了virtual关键字 则此类的大小会发生变化 多出一个vptr指针
-不要继承non-virtual的类 如string vector list unorder_map ......等
-如果有多态 则基类内肯定有virtual 有virtual肯定有virtual析构函数
