@@ -1,0 +1,78 @@
+只要有资源 就给他初始化成对象 目的是为了不忘记close/释放资源等
+f()
+{
+	Investment* p = createInvestment();
+	...
+	delete p;
+}
+这样写并不能一定可以delete 因为...可能抛出异常 或者...中出现return
+同时在修改别人的代码时 添加return continue时一定要小心
+恰当的做法是 把资源放入对象内 依赖与c++的析构函数
+f()
+{
+	std::auto_ptr<Investment> p(createInvestment());
+	...
+} 离开作用域auto_ptr的析构自动删除p
+关键1 获取资源后立刻放进管理对象也叫Resource Acquisition Is Initialization RAII
+关键2 运用析构函数确保资源被释放
+auto_ptr有一个特性 当调用copying函数时 他们会变成null而复制所得的指针将获得资源的唯一拥有权
+这就确保了它没有一个以上的auto_ptr同时执行同一内存块
+这虽然好  但是又不好 因为stl容器里想多存放一份指针以便后续操作比如我的conf.cc文件 这便出现了引用计数智能指针
+reference-counting smart pointer RCSP  智能指针不能处理环状引用 飞哥遇到过 沪指则意为被使用状态
+注意auto_ptr和shared_ptr都是在析构内做delete而非delete[]动作 所以不要用于array 所以用vector代替
+
+把资源给“灌装”起来(共享指针 生成对象) 有一定的局限性 所以要自定义资源管理类
+为了防止资源泄露 请使用RAII对象 他们在构造函数中获得资源并在析构中释放资源
+两个常备使用的RAII类是 shared_ptr和auto_ptr 前者最佳copy行为比较直观 若选择后者复制动作会使它指向null
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

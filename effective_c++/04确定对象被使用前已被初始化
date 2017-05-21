@@ -1,0 +1,38 @@
+c++的初始化反复无常
+记住 内置类型手工初始化 对象在构造里手工初始化
+我写的那个ipdb软件 都是赋值操作而非初始化 构造的初始化时以member initialization list
+ip138_spider_ip::ip138_spider_ip(std::string ip_begin, std::string ip_end):ip_b(ip_begin),ip_e(ip_end) 
+{这里面最好只能是内置类型的赋值} 如果按照原始版本的赋值操作 它会首先调用构造(构造出一个对象 看下面) 再调用赋值 而这里是直接拷贝构造
+而{}内的内置类型赋值 这句话并不是很恰当 如果内置类型是对象(sting)最好也别用等号隐式的初始化赋 最好还是用()显示的初始化的方式 //err 内置类型只能是那几个基本的类型
+昨天修改了一下但还不是很准确
+不同编译单元内定义的non-local-static对象的初始化次序
+static对象 即不在stack和heap上 包括global对象定义在namespace作用域内的对象在class内函数内以及在file作用域内被声明为static的对象
+函数内的static对象是local static对象 其他都为non-local static对象 non-local static对象的初始化次序没有明确的定义 
+试想 一个文件中 一个对象要用到另一个文件中的对象实例本身 如果此对象本身还没有初始化 则会出现问题 这就是no-local static（另一个文件中 全局的位置 extern FileSystem tfs）带来的恶果
+编译单元是单一的目标文件 有源码文件加上所含头文件组成
+此种次序编译器是无法确定的 解决方案是单例模式 ：即local-static代替no-local static
+即把static放到{}内变成local-static
+
+c++规定规定规定初始化动作发生在构造函数之前 so构造函数里的都是赋值操作
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,22 @@
+资源管理类是对抗资源泄露的堡垒
+操作资源管理对象而非玷污双手直接处理原始资源raw resource
+使用智能指针auto_ptr shared_ptr保存factory函数的调用结果
+std::tr1::shared_ptr<Investment> pInv(createInvestment());
+int daysHeld(const Investment* pi) //返回投资天数
+在调用时 不能daysHeld(pInv) 一个是对象一个是指针 so得把对象转化为其内部原始资源
+显式转换 即智能指针的get成员函数 
+隐式转换 当然智能指针内部重载了->和*操作符 可以指向、取得对象内部资源
+即调用的时候daysHeld(pi->day()) //返回投资天数
+
+so在自己写的资源管理类中 
+要么自己写显式的转换函数 raw_res get() const { return f; } 
+要么写隐式转换函数 operator raw_res() const { return f; } 但是这样又容易发生错误 没看懂
+
+apis往往要求访问原始资源 所以每个RAII class应该提供一个取得其所管理资源的方法
+通常由显式或隐式转换 一般用显式
+
+
+
+
+
+

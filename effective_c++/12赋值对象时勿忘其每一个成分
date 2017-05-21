@@ -1,0 +1,43 @@
+每添加一个成员变量就得修改copying构造函数 
+当发生继承时 必须让继承中的copying函数调用相应的基类函数
+class Customer
+{
+	public:
+	    Customer(const Customer& rhs);
+	    Customer& operator=(const Customer& rhs);
+	private:
+	    std::string name;
+};
+
+Customer::Customer(const Customer& ths):name(rhs.name)
+{
+	;
+}
+Customer& Customer::operator=(const Customer& rhs)
+{
+	name = rhs.name;
+	return *this;
+}
+
+class PriorityCustomer: public Customer
+{
+	public:
+	    PriorityCustomer(const PriorityCustomer& rhs);
+	    PriorityCustomer& operator(const PriorityCustomer& rhs);
+	private:
+ 	    int priority;
+};
+
+PriorityCustomer::PriorityCustomer(const PriorityCustomer& rhs)
+	:Customer(rhs),  //看4
+	priority(rhs.priority)
+{;}
+
+PriorityCustomer& PriorityCustomer::operator(const PriorityCustomer& rhs)
+{
+	Customer::operator=(rhs);
+	priority = rhs.priority;
+	return *this;
+}
+
+

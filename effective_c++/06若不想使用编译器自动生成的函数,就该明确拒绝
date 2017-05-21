@@ -1,0 +1,25 @@
+每个房源都是独一无二的(不允许拷贝)
+home_for_sale h1; home_for_sale h2; home_for_sale h3(h2); h1 = h2;//错的 
+因为编译器默认编译出的拷贝和赋值都是public的 这里为了不让外部使用拷贝和赋值则把他们声明为private
+只声明即可 不需定义 即使是外部有人不小心调用时(友元函数) 在连接过程会获得一个连接错误(linkage error)
+连接错误很不好(深有体会 甚感恶心) 怎样让错误提前发生在编译期
+解决方案:
+class Uncopyable 
+{
+	protected:
+	    Uncopyable(){}
+	    ~Uncopyable(){}
+	private:
+	    Uncopyable(const Uncopyable&);
+	    Uncopyable& operator=(const Uncopyable&);
+}
+class home_for_sale: private Uncopyable
+{}当外部调用拷贝时 则先调用基类的Uncopyable的拷贝 被编译器拒绝因为拷贝构造是private
+无论怎么继承都在派生类中调用不了 用private继承暂时不知道有什么好处
+
+
+
+
+
+
+
