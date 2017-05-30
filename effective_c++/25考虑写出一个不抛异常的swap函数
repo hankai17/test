@@ -1,0 +1,45 @@
+swap是异常的脊柱
+class WidgetImpl
+{
+	public:
+	    ...
+	private:
+	    int a, b, c;
+	    std::vector<double> v;
+};
+
+class Widget
+{
+	public:
+	    Widget(const Widget& rhs);
+	    Widget& operator=(const Widget& rhs)
+	    {
+		...
+		*pImpl = *(rhs.pImpl);  //当调用swap时 复制了三个对象 直接交换对象效率太低
+		...
+	    }
+	private:
+	    WidgetImpl* pImpl;		
+};
+
+修改swap源码
+namespace std
+{
+	template<>
+	void swap<Widget> (Widget& a, Widget& b)
+	{ swap(a.pImpl, b.pImpl);}  //而不是直接交换a b对象
+} //但是指针是私有的 所以无法编译
+so 在Widget中添加swap函数
+void swap(Widget& other)
+{
+	using std::swap;
+	swap(pImpl1, other.pImpl);
+}
+namespace std
+{
+	template<>
+	void swap<Widget> (Widget& a, Widget& b)
+	{ a.swap(b);}
+}
+
+...

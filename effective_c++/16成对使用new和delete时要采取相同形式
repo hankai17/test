@@ -1,0 +1,10 @@
+new时 发生2件事 1分配内存通过 operator new函数实现 2被分配的内存调用一个或多个构造函数
+so 相应的delete时 也发生2件事 1将被释放的内存调用一个或多个析构函数 2然后释放内存  通过operator delete函数
+即new时有[]则delete时有[] new时没有[]delete时也得小心
+so 就有了delete[] 所谓的删除括号的格式
+
+typedef string address_line[4];
+string* foo = new address_line;
+delete foo;  //error!
+所以杜绝对数组typedef
+有了vector 所以几乎没有上面这种情况

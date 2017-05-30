@@ -1,0 +1,38 @@
+类似共享指针、智能指针 设计智能锁
+已有 void lock(Mutex* pm); void unlock(Mutex* pm);为了确保不忘记将一个被锁住的Mutex解锁
+则用RAII机制
+class Lock 
+{
+	public:
+	explicit Lock(Mutex* pm)
+	    :mutexPtr(pm)
+	{ lock(mutexPtr); }
+	~Lock() { unlock(mutexPtr); }
+	private:
+	    Mutex* mutexPtr;
+};
+使用时 
+Mutex m;
+{
+	Lock m1(&m);
+	...
+} //最后自动解锁   智能指针支持自定义删除器
+但是如果有Lock对象被复制 Lock m1(&m);Lock m2(m1); 会发生什么
+1要么禁止复制 即 class Lock: private Uncopyable{...I6}
+2要么祭出 引用计数法 就得使用shared_ptr了
+class Lock
+{
+	public:
+	explic: Lock(Mutex* pm)
+	    :mutexPtr(pm, unlock)
+	{ lock(mutexPtr.get()); }
+	private:
+	    std::tr1::shared_ptr<Mutex> mutexPtr;
+};
+没写析构函数依赖编译器生成的缺省行为 I5说了 一切no-static成员变量自动调用各自析构
+3复制底部资源 即深拷贝
+4转移底部资源拥有权 即auto_ptr
+5copying函数
+
+复制RAII对象必须一并复制它所管理的资源 资源的copying行为决定了RAII对象的copying行为
+常见的RAII class的copying行为有5种

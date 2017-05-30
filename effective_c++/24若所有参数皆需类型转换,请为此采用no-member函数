@@ -1,0 +1,12 @@
+class Rational
+{
+	const Rational operator* (const Rational& rhs) const;
+};
+当 result = oneHalf * 2时 没有问题
+当 result = 2 * oneHalf时 就错了
+可以看成 result = oneHalf.operator*(2) 可行
+result = 2.operator*(oneHalf) 不可行
+编译器进行了隐式类型转化 implicit type conversion 即const Rational temp(2)
+so 如果两者都支持 得写成no-member函数
+const Rational operator* (const Rational& lhs,const Rational& rhs) const;
+

@@ -1,0 +1,67 @@
+你就该确实说出来 说出来就可以获得编译器的襄助 确保此条约束不被违反
+stl的迭代器默认是T* const指针 指针的值不能发生改变 若不改变迭代器所指内容 则使用const T* 即const_iterator
+const叼的地方是函数声明 即用于返回值 参数 成员函数
+函数返回一个const常量 可降低因客户错误而造成的以外 而又不至于放弃安全性和高效性:
+const class operator* (const class& l, const class& r);
+如果返回值不是const 则会 (a * b) = c;  当然也会调用operator=  (assignment即赋值)
+如果写成const 还能避免 类似if(a*b = c)这样的错误
+至于const参数 我好想没有这个习惯 希望改正
+const成员函数 非常重要 1使class接口比较容易理解 大概知道哪个函数可以改动对象内容哪个函数不行(即所谓的传入传出！)
+2操作const对象成为可能 提高c++效率的根本办法是pass by reference-const
+当const在函数名前面的时候修饰的是函数返回值，在函数名后面表示是常成员函数，该函数不能修改对象内的任何成员，只能发生读操作，不能发生写操作
+const char& operator[](std::size_t pos) const //operator[] for const对象
+char& operator[](std::size_t pos) //operator[] for non-const对象
+so void print(const class& c) 这样调用时 调用const函数
+const不能改变对象内任何non-static成员变量 如果是指针的话 可以在外部改变该成员变量指针所指向的内存(那个例子)
+如果想在const函数里对成员变量赋值 则用mutable释放掉non-static成员变量的constness约束(是在声明处写mutable)
+关于消除代码重复的问题：
+	const char& operator[](std::size_t pos) const
+	{
+		边界检查
+		log打印
+		数据完整性判断
+		return text[pos]
+	}
+	char& operator[](std::size_t pos)
+	{
+		边界检查
+		log打印
+		数据完整性判断
+		return text[pos]
+	}
+要求必须其中的一个调用另一个 以减少重复 得使用常量性转除(casting away constness)
+	char& operator[](std::size_t pos)
+	{
+		return
+		    const_cast<char&>(  //移除const属性
+			static_cast<const class&>(*this)  //把对象强转为const
+			    [pos]
+		    );
+	}
+const函数承诺不改变函数对象 so反向调用不恰当 
+
+总结：
+	将某些变量声明为const有助于编译器识别错误 const可被施加于任何作用域内的对象 函数参数 返回值 成员函数本体
+	编译器强制实施bitwise constness 但编写程序时应使用概念上的常量
+	当const和non-const成员函数有着实质等价的实现时 令non-const调const
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
