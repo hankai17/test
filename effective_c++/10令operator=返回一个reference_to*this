@@ -1,7 +1,0 @@
-为了链式编程
-Widget& operator=(const Widget& rhs) //返回引用 指向当前对象
-{
-	...
-	return *this; //返回左侧对象
-}
-令赋值(assignment)操作符返回一个reference to *this

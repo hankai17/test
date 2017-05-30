@@ -1,8 +1,0 @@
-有 int priority()
-void processWidget(std::str1::shared_ptr<Widget pw>, int priority);
-在调用时 processWidget(new Widget, priority()); 这样是不行的 因为shared_ptr是explicit构造函数
-不允许隐式转换 得processWidget(std::tr1::shared_ptr<Widget>(new Widget), priority());
-但是调用顺序不确定 1new 2priority 3shared_ptr构造 如果在步骤2发生异常 则内存泄露
-so std::tr1::shared_ptr<Widget> pw(new Widget);
-processWidget(pw, priority());
-即以独立语句将newed对象存储于智能指针 
