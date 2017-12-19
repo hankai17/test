@@ -101,7 +101,10 @@ class dns_conf {
         std::vector< std::vector<icr_str_t *>* > str_servers; //vec中的每个vec*保存的都是每个组的ip	//vec* 作为hash_map的val
         int group;
 
-        __gnu_cxx::hash_map<unsigned long,int,__gnu_cxx::hash<unsigned long>,hm_strcmp2> servers_hash;
+        __gnu_cxx::hash_map<unsigned long,int,__gnu_cxx::hash<unsigned long>,hm_strcmp2> servers_hash; //第一组pair(ulong地址 ,1)  ulong地址代表的是&vec<str_ip>  最后把ulong插入到str_servers中
+        //第二组pair(ulong地址, 2) ulong地址代表的是&vec<string> 最后把ulong插入到str_servers中
+        //第三组pair(ulong地址, 3) ulong地址代表的是&vec<string> ...
+       //域名相关的hash结构是 pair(domain, ulong) 这个才是设计的核心！！！ 根据域名匹配ip
 
         __gnu_cxx::hash_map<char*, std::vector<icr_str_t*>*,__gnu_cxx::hash<char*>,hm_strcmp1> str_white_domain_hash;
         __gnu_cxx::hash_map<char*, std::vector<icr_str_t*>*,__gnu_cxx::hash<char*>,hm_strcmp1> str_white_head_hash;
