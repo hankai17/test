@@ -90,3 +90,6 @@ int main(void)
 	return 0;
 }
 //move语意 即对临时(右值)对象进行浅拷贝
+//vec.push_back obj
+//不管obj是左值右值 如果obj没有move语义 则都会调用obj的拷贝构造
+//如果obj有move语义 则调右值时 调move语义
