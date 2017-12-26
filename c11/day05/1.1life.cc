@@ -14,7 +14,7 @@ void func()
 void create_thread()
 {
 	std::thread t(func);
-	g_list.push_back(std::move(t));
+	g_list.push_back(std::move(t)); //push_back时 会发生拷贝和西沟动作 
 	g_list2.push_back(std::make_shared<std::thread>(func));
 }
 

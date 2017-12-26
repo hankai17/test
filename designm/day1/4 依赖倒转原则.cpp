@@ -96,6 +96,8 @@ int main(void)
     //张三去开宝马
     BMW * bmw = new BMW;
     z3->driveBMW(bmw);
+    //有没有觉得开闭原则 跟 单一职责原则有点互斥
+    //而依赖反转原则 是两个的集合
     #endif
     //张三去开奔驰
     Driver* zang3 = new Zhang3;
