@@ -81,15 +81,17 @@ public:
 
 int main(void)
 {
+#if 0
 	MyString a;
-	a = MyString("Hello");
-/*
+	a = MyString("Hello"); //move assignment
+#else
+	MyString a;
+	a = MyString("Hello"); //move assignment
 	std::vector<MyString> vec;
-	vec.push_back(MyString("World"));
-*/
+    vec.push_back(a); //copy constructor
+	//vec.push_back(MyString("World")); //move Constructor
+#endif 
 	return 0;
 }
 //move语意 即对临时(右值)对象进行浅拷贝
-//vec.push_back obj
-//不管obj是左值右值 如果obj没有move语义 则都会调用obj的拷贝构造
-//如果obj有move语义 则调右值时 调move语义
+//push_back时 如果push一个左值则一定会调用拷贝构造 如果push一个右值时则该对象得支持move语义
