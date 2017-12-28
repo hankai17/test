@@ -23,7 +23,7 @@ int main(void)
 		int b = 1;
 		auto f1 = []{return a; };  //error,没有捕获外部变量 
 		auto f2 = [&]{return a++; };
-		auto f3 = [=]{return a; };
+		auto f3 = [=]{return a + b; }; //以值的方式捕捉外部所有变量
 		auto f4 = [=]{return a++; };  //error,a是以复制方式捕获的，无法修改
 		auto f5 = [a]{return a + b; };  //error,没有捕获变量b
 		auto f6 = [a, &b]{return a + (b++); };
