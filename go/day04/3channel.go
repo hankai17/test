@@ -4,17 +4,19 @@ import "fmt"
 
 func Count(ch chan int) {
 	fmt.Println("Counting")
-	ch <- 1 //10个 都阻塞于此 等待被读取
+	ch <- 1 //10个 都阻塞于此 等待被读取 //由于没有分配缓存，因此这里会被堵塞掉 等待程序某个地方从该通道读取数据！
 }
 
 func main() {
 	chs := make([]chan int, 10) //make([]int,10) 是slice
 	for i := 0; i < 10; i++ {
-		chs[i] = make(chan int) //初始化channel ,以便以参数传递
+		chs[i] = make(chan int) //初始化channel ,以便以参数传递 //注意是没有分配缓存的。
 		go Count(chs[i]) //以channel为参数传递 即通过通信共享共享内存
 	}
 	for _, ch := range chs {
-		<-ch
+      <-ch
+      //val := <-ch
+      //fmt.Println(val)
 	}
 }
 //声明
