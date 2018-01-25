@@ -1,0 +1,2 @@
+配置环境变量 export GOPATH=/root/test/go/day03/mplayer
+在当前目录下建src目录 在src目录里建各种自己的包
