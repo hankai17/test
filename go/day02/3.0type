@@ -117,3 +117,19 @@
         copy(slice2, slice1) //拷贝1的前3个元素 
         copy(slice1, slice2)  //同上
 
+9 type关键字几个作用
+    定义结构体 
+    
+    类型重命名
+        type name string //name与string等同
+    
+    结构体 内嵌匿名成员
+        type person struct {
+          string  //一个string类型的匿名成员变量
+          age  int
+        }
+
+    定义函数类型
+        type handler func(name string) int //handler是一个函数类型/函数对象
+
+
