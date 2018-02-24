@@ -2,7 +2,7 @@ http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.htm
 https://studygolang.com/articles/9995
 http://blog.csdn.net/weiyuefei/article/details/77967619
 
-1“{”不能单独放在一行 //看起来树虎
+1"{"不能单独放在一行 //看起来树虎
 2未使用已定义的变量 //严谨
 3未使用的包 //严谨
 4只能在函数内部使用简短的变量声明 //全局区不能这样 myvar := 1 只能var myvar = 1
@@ -32,4 +32,8 @@ http://blog.csdn.net/weiyuefei/article/details/77967619
 9使用 Slice 和 Array 的 range 会导致预料外的结果
 	//不是那个02问题这里讲的是range返回两个值
 10 04.2array.go
+11 如果返回值中有名称则全都得带名称 
+    func funcMui(x,y int)(sum int,error){ //改为(sum int, er error)
+        return x+y,nil
+    }
 11Accessing Non-Existing Map Keys

@@ -38,9 +38,21 @@ func main1() {
 }
 
 func main() {
-	s := make([]int, 5) //make必须指定切片长度
+	//s := make([]int, 5) //make必须指定切片长度
+	s := make([]int, 0) //make必须指定切片长度
 	s = append(s, 1, 2, 3)
+
+    //b := [2]int{0, 0}
+    //s = append(s, b)
 	fmt.Println(s)
+}
+
+func main3() {
+	s1 := []int{1, 2, 3}
+	s2 := []int{4, 5}
+	//s1 = append(s1, s2)
+	s1 = append(s1, s2...) //append切片时候必须加... 数组没有append
+	fmt.Println(s1)
 }
 
 //会重用地址，也就是说，for _, stu := range stus 中的 stu 总是在同一个地址（你可以 fmt.Printf("%p\n", &stu) 试试)这样最终所有的结果都只是最后一个了。
