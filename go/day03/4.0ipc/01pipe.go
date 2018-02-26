@@ -62,6 +62,20 @@ func demo1() {
 	cmd0 := exec.Command("echo", "-n", "My first command from golang.")
 
 	stdout0, err := cmd0.StdoutPipe() //stdout0是io.ReadCloser类型 这是个接口类型并扩展了接口类型io.Reader so就可以调用Read方法获取输出了
+	/*
+	 src/io/io.go源码包里看这个返回值类型
+	 ReadCloser is the interface that groups the basic Read and Close methods.
+	 126  type ReadCloser interface {
+	 127  	Reader
+	 128  	Closer
+	 129  }	
+
+	 	 type Reader interface {
+     78  	Read(p []byte) (n int, err error)
+     79  }
+
+	 也就是说io.ReadCloser实现了Read方法!!!
+	*/
 	if err != nil {
 		fmt.Printf("Error: Can not obtain the stdout pipe for command No.0: %s\n", err)
 		return
