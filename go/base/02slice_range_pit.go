@@ -11,6 +11,7 @@ func main() {
         fmt.Printf("&value=%v\n",&value) //即range返回的是一个重复的地址
         a := value
         myMap[index] = &a
+        fmt.Println(&a)
     }
     fmt.Println("=====new map=====")
     prtMap(myMap)

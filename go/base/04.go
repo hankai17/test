@@ -1,6 +1,7 @@
 package main
 import (
 	"fmt"
+    "runtime"
 )
 
 type People struct{}
@@ -21,8 +22,12 @@ func (t *Teacher) ShowB() {
 }
 */
 
-func main() {
+func main1() {
 	t := Teacher{}
 	t.ShowA()
 	t.ShowB() //会把基类覆盖掉
+}
+
+func main() {
+    fmt.Println(runtime.Version())
 }
