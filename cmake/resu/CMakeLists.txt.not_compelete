@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.9)
+project(spider)
+
+set(Headers
+        inc/ip138.hh
+        inc/ipcn.hh
+        inc/ipip.hh
+        inc/log.hh
+        inc/spider_ip.hh
+        inc/tb.hh
+        )
+
+set(Sources
+        src/ip138.cc
+        src/ipcn.cc
+        src/ipip.cc
+        src/log.cc
+        src/main.cc
+        src/qip.cc
+        src/spider_ip.cc
+        src/tb.cc
+        )
+#include_directories("${spider_SOURCE_DIR}/inc/")
+#include_directories("${spider_SOURCE_DIR}/src/")
+#add_subdirectory(src)
+#add_executable(${EXECUTABLE_NAME} ${Sources} ${Headers})
+
+#set(CMAKE_CXX_STANDARD 11)
+
+message("hi\n")
+message(${spider_SOURCE_DIR})
+message(${PROJECT_BINARY_DIR})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+
+add_custom_target(spider COMMAND make -C ${spider_SOURCE_DIR}
+        CLION_EXE_DIR=${PROJECT_BINARY_DIR} && cp ${spider_SOURCE_DIR}/spider ./  #cp executing file to dir
+        )

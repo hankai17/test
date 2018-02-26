@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.2)
+
+PROJECT(spider)
+SET(CMAKE_CXX_COMPILER "/usr/local/bin/g++")
+
+INCLUDE_DIRECTORIES(
+        inc
+)
+
+AUX_SOURCE_DIRECTORY(src DIR_SRCS)
+
+SET(SPIDER
+        ${DIR_SRCS}
+        )
+
+ADD_EXECUTABLE(${PROJECT_NAME} ${SPIDER})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} m curl pthread boost_regex)
+FIND_LIBRARY(
+   LIBDB_CXX_LIBRARIES NAMES  boost_regex
+   PATHS /usr/lib/ /usr/local/lib/
+   )
