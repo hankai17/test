@@ -6,57 +6,61 @@ import (
 	"fmt"
 	"io"
 	"time"
-	"io/ioutil"
+	//"io/ioutil"
 	"os/exec"
 )
 
 func main() {
 	//demo1()
 	//fmt.Println()
-	demo2()
+	//demo2()
+	demo3()
 	time.Sleep(time.Second * 10)
+}
+
+func demo3() {
+	fmt.Println("Run command `ps au | grep bash`: ")
+	cmd1 := exec.Command("ps", "x") //au或者x
+	cmd2 := exec.Command("grep", "bash")
+	var outputBuf1 bytes.Buffer
+	cmd1.Stdout = &outputBuf1
+	cmd1.Start()
+	cmd1.Wait()
+
+	cmd2.Stdin = &outputBuf1
+
+	var outputBuf2 bytes.Buffer
+	cmd2.Stdout = &outputBuf2
+	cmd2.Start()
+	cmd2.Wait()
+	fmt.Printf("%s\n", outputBuf2.Bytes())
 }
 
 func demo2() {
 	fmt.Println("Run command `ps aux | grep bash`: ")
-	cmd1 := exec.Command("ps", "aux")
+	cmd1 := exec.Command("ps", "x")
 	cmd2 := exec.Command("grep", "bash")
-	stdout1, err := cmd1.StdoutPipe()
-	if err != nil {
-		fmt.Printf("Error: Can not obtain the stdout pipe for command: %s", err)
-		return
-	}
-	if err := cmd1.Start(); err != nil {
-		fmt.Printf("Error: The command can not running: %s\n", err)
-		return
-	}
-	//至此数据已到stdout1中
+
+	stdout1, _ := cmd1.StdoutPipe()
+	cmd1.Start()
+	cmd1.Wait()
 	outputBuf1 := bufio.NewReader(stdout1)
-	//至此数据已到outputBuf1中
-	stdin2, err := cmd2.StdinPipe() //是io.WriteCloser类型 ...
-	if err != nil {
-		fmt.Printf("Error: Can not obtain the stdin pipe for command: %s\n", err)
-		return
-	}
+	stdin2, _ := cmd2.StdinPipe()
 	outputBuf1.WriteTo(stdin2) // stdout1-->outputBuf1-->stdin2
-	//至此数据已到stdin2中
+
+	//stdout1.Close()
+	//cmd1.Process.Kill()
 
 	var outputBuf2 bytes.Buffer //定义一个缓冲区
 	cmd2.Stdout = &outputBuf2
-	if err := cmd2.Start(); err != nil {
-		fmt.Printf("Error: The command can not be startup: %s\n", err)
-		return
-	}
-	err = stdin2.Close()
-	if err != nil {
-		fmt.Printf("Error: Can not close the stdio pipe: %s\n", err)
-		return
-	}
-	if err := cmd2.Wait(); err != nil { //等待命令运行完毕后打印缓冲区数据
-		fmt.Printf("Error: Can not wait for the command: %s\n", err)
-		return
-	}
+	cmd2.Start()
+	stdin2.Close()
+	cmd2.Wait()
+
 	fmt.Printf("%s\n", outputBuf2.Bytes())
+	//stdout1.Close()
+	//cmd1.Process.Kill()
+	//cmd2.Process.Kill()
 }
 
 func demo1() {
