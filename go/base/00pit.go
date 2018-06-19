@@ -1,3 +1,4 @@
+我今天超级难受 超级难受
 http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html
 https://studygolang.com/articles/9995
 http://blog.csdn.net/weiyuefei/article/details/77967619
