@@ -12,7 +12,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     http.HandleFunc("/hello", helloHandler)
-    err := http.ListenAndServe(":8080", nil)
+    err := http.ListenAndServe(":7080", nil)
     if err != nil {
         log.Fatal("ListenAndServer:", err.Error())
     }

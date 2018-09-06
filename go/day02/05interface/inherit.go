@@ -13,9 +13,9 @@ func main() {
 */
 
 /*
-type myLocker struct {
+type myLocker struct { //用匿名方式把原有类型嵌入其中  //Go语言中的继承是通过内嵌或组合来实现的
     sync.Mutex //看golang包 mutex是个结构体
-}
+} 
 func main() {
     var lock myLocker
     lock.Lock() //ok //把一个元素包装成struct的好处 最大的好处就是继承!!!!!!!!!!!!!
