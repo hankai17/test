@@ -1,0 +1,5 @@
+消息: std::function<可调用对象>
+消息注册: topic + std::function<可调用对象>
+消息保存: unordered_multimap<string, Any>
+消息分发: 
+
