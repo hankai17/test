@@ -1,0 +1,15 @@
+#!/bin/bash
+
+MYUSER=`whoami`
+echo $MYUSER
+
+MYPID=`ps -u $MYUSER | grep keymngserver | awk {'print $1'}`
+echo $MYPID
+
+if [ -z $MYPID ]
+then
+        echo "SecMngServer have not start"
+        exit 1
+fi
+
+kill -10 $MYPID

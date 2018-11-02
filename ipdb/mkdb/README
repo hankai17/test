@@ -1,0 +1,6 @@
+注意事项：                                                                                                                                               
+    make_db作用是:将ip文件(ip.txt) 生成ip数据库文件(ip.db)
+    c++目录下存放了c++查询接口  
+        c_search.cc与c_search.hh文件是 c++语言写的查询ip数据库文件(ip.db)的接口函数  
+        c_search_test.cc是一个查询ip的案例
+    python目录下存放了python查询接口
