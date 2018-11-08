@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall -O2   -L/usr/local/lib -Wl,-rpath,/usr/local/lib CMakeFiles/fakecli.dir/buffer.cpp.o CMakeFiles/fakecli.dir/message.cpp.o CMakeFiles/fakecli.dir/rr.cpp.o CMakeFiles/fakecli.dir/qs.cpp.o CMakeFiles/fakecli.dir/fakecli.cpp.o  -o fakecli -rdynamic 

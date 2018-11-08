@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall -O2   -L/usr/local/lib -Wl,-rpath,/usr/local/lib CMakeFiles/fakesrv.dir/buffer.cpp.o CMakeFiles/fakesrv.dir/message.cpp.o CMakeFiles/fakesrv.dir/rr.cpp.o CMakeFiles/fakesrv.dir/qs.cpp.o CMakeFiles/fakesrv.dir/fakesrv.cpp.o  -o fakesrv -rdynamic 
