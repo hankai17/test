@@ -101,3 +101,4 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #tcpdump -nn -i p2p1 'tcp port 80 or tcp port 9011' -w 104.pcap
 
 #tcpdump -i eth4 -nnnAs 0 tcp port 9011 and ip src 1.1.1.1 -w 1.pcap  tcp先抓包 再用wireshark看
+
