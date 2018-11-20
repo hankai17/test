@@ -24,7 +24,7 @@ class sync_queue {
 	  m_notEmpty.wait(locker, [this]{return m_needStop || NotEmpty(); });
 
 	  if (m_needStop) return;
-	  list = std::move(m_queue);
+	  list = std::move(m_queue); //否则将会调用T的拷贝构造函数
 	  m_notFull.notify_one();
 	}
 
