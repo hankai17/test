@@ -10,7 +10,7 @@ class A {
 	  std::cout<<"cp construct"<<std::endl;
 	}
 
-	A(A&& a) :m_ptr(a.m_ptr) {
+	A(A&& a) :m_ptr(a.m_ptr) { //为什么move构造 只是一个浅拷贝? 因为他是右值 因为它不需要深拷贝 只需要转移控制权限就可以了
 	  std::cout<<"move construct"<<std::endl;
 	  a.m_ptr = nullptr;
 	}
