@@ -19,6 +19,7 @@ para的类型是未定的 这取决于是怎样初始化的 所以para是一个�
 int w1, w2;
 auto&& v1 = w1;
 decltype(w1)&& v2 = w2;
+decltype(w1)&& v2 = w2
 /*
 v1是未定引用 被一个左值初始化所以为左值
 v2是右值引用 被一个左值初始化是错误的 改为decltype(w1)&& v2 = std::move(w2);
