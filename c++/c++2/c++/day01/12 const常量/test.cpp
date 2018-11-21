@@ -1,1 +1,0 @@
-extern const int a = 10; //c++ const变量默认内部连接
