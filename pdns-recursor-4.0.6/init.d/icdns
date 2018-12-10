@@ -1,0 +1,85 @@
+#!/bin/sh
+#
+# Startup script for the icdns daemon
+#
+# chkconfig: - 30 70
+# description: icdns daemon
+#
+# processname: icdns
+# config: /etc/icdns/recursor.conf
+# pidfile: /var/run/icdns/icdns.pid
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 1
+
+OPTIONS="--daemon"
+
+[ -f /etc/icdns/recursor.conf ] || exit 1
+[ -f /usr/sbin/icdns ] || exit 1
+
+
+RETVAL=0
+prog="icdns"
+pidfile=/var/run/icdns/icdns.pid
+mkdir -p /var/run/icdns/
+
+
+start() {
+    echo -n $"Starting $prog:"
+    daemon /usr/sbin/icdns $OPTIONS 2>/dev/null
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/icdns
+    pidof $prog | awk '{print $1}' > $pidfile
+    return $RETVAL
+}
+
+
+stop() {
+    echo -n $"Stopping $prog:"
+    pidof $prog > $pidfile
+    killproc icdns
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/icdns
+    return $RETVAL
+}
+
+
+restart() {
+    stop
+    start
+}
+
+
+case "$1" in
+    start)
+	start
+	;;
+    stop)
+	stop
+	;;
+    restart)
+	restart
+	;;
+    condrestart)
+	[ -e /var/lock/subsys/icdns ] && restart
+	;;
+    status)
+	status icdns
+	RETVAL=$?
+	;;
+    *)
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+
+exit $RETVAL

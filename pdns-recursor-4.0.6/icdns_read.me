@@ -1,0 +1,30 @@
+注意:
+    所有配置文件:domain-white-list domain-black-list 和 recursor.conf文件 均放在 /etc/icdns 目录下
+    ics探测发送邮件目录也是 /etc/icdns 邮件名称为sdmail.pl
+    所有文件均未编译,编译时需要注意: 
+    修改版本号：
+    configure : PACKAGE_VERSION, PACKAGE_STRING, VERSION
+    执行命令:
+      ./lConfig.sh
+      
+    修改版本号：
+      Makefile.pg
+        VERSION、release
+      make
+
+打包执行make -f Makefile.pg, 查看说明
+
+├── etc
+│   ├── icdns
+│   │   └── recursor.conf
+│   └── rc.d
+│       └── init.d
+│           └── icdns
+└── usr
+     ├── bin
+     │   └── rec_control
+     ├── sbin
+         └── icdns
+    该版本添加了ipv6开关 在recursor.conf文件中进行配置： ipv6=on 即开启ipv6功能 ipv6=off 即关闭ipv6功能 注意默认情况下为关闭ipv6功能
+    该版本添加了探测开关 在recursor.conf文件中进行配置：servers_probe=on 即开启探测功能 servers_probe=off 即关闭探测功能 注意默认情况下为开启探测功能
+    改版本现在支持 "*." 通配：将会匹配所有域名

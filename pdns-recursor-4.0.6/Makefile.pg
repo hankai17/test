@@ -1,0 +1,28 @@
+pfiles=icdns rec_control icdns.initd recursor.conf sdmail.pl libboost_context.so.1.63.0 libboost_system.so.1.63.0 libboost_thread-mt.so.5 libstdc++.so.6.0.22.gz domain-black-list domain-white-list libboost_context.so.1.63.0.el7  libboost_system.so.1.63.0.el7  libboost_thread-mt.so.1.53.0.el7 libboost_chrono.so.1.63.0.el7 libboost_thread.so.1.63.0.el7
+RPM_SRC=/usr/src/redhat/SOURCES/
+SYS_VER=$(shell uname -r | awk 'BEGIN{FS = "el"} {print $$2}' | awk 'BEGIN{FS = "."} {print "el"$$1}')
+
+spec_file=sources/icdns.spec
+VERSION=4.0
+release=6.3
+
+$(shell touch sources/domain-black-list && touch sources/domain-white-list)
+all:
+	@echo -e "\tgenerate sdmail.pl : make -f Makefile.pg sdmail"
+	@echo -e "\tset version $(VERSION).$(release) : make -f Makefile.pg ver"
+	@echo -e "\tpackage files      : make -f Makefile.pg package"
+	@echo -e "\trpmbuild           : rpmbuild -bb sources/icdns.spec"
+
+sdmail:
+	go build -o sources/sdmail.pl sources/sdmail.go
+
+ver:
+	@sed -i /"^Version:"/d $(spec_file) && sed -i /"^Name:"/a'Version:   $(VERSION)' $(spec_file)
+	@sed -i /"^Release:"/d $(spec_file) && sed -i /"^Version:"/a'Release:   $(release).SYS_VER' $(spec_file)
+
+package:
+	cp pdns_recursor sources/icdns
+	cp rec_control   sources/
+	cp init.d/icdns  sources/icdns.initd
+	sed -i s/"SYS_VER"/"$(SYS_VER)"/g $(spec_file)
+	cd sources && tar zcvf icdns.tar.gz $(pfiles) && mv icdns.tar.gz $(RPM_SRC)
