@@ -16,7 +16,7 @@ import (
 
 const (
 	mail_user   = "icalert@intcache.com"
-	mail_passwd = "i24dwsBssbk_)(*~"
+	mail_passwd = "i24d_)(*~"
 
 	smtp_server = "smtp.exmail.qq.com:25"
 	//smtp_server = "smtp.exmail.qq.com:465"
@@ -150,7 +150,7 @@ func (m *Nmail) MakeBody(content string) (body string){
 
 func NmailTestProc() {
 	user := "intcache@163.com"
-	password := "1234qwer"
+	password := "wer"
 	smtp_server := "smtp.163.com:25"
 	to := "xiaoliang.hao@intcache.com"
 	nmail := New(smtp_server, user, password, to)
