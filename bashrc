@@ -16,6 +16,11 @@ function find_str() {
   egrep $1 * -nR --color
 }
 
+number=100
+for n in $(seq $number); do
+  `cp 0.html $n.html`	
+done
+
 function run() {
   number=$1
   shift
