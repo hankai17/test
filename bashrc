@@ -106,12 +106,13 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #tcpdump -nn -i p2p1 'tcp port 80 or tcp port 9011' -w 104.pcap
 
 #tcpdump -i eth4 -nnnAs 0 tcp port 9011 and ip src 1.1.1.1 -w 1.pcap  tcp先抓包 再用wireshark看
-tcpdump -i bond0 -nnnAs 0 tcp port 9011 and ip src 10.148.5.231 -w 1.pcap
-tcpdump -i bond0 -XnnnAs 0 tcp port 9011 and ip src 10.148.5.231 -w 1.pcap
-tcpdump -i bond0 -Xnns 0 tcp port 9011 and ip src 10.148.5.231 -r 1.pcap|more
-tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.148.5.231 -w 1.pcap
-tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.148.5.231 -r 1.pcap
-tcpdump -i bond0 -Xnns 0 tcp port 9011  -w 1.pcap
-tcpdump -i bond0 -Xnns 400 tcp port 9011 and host 10.133.9.178  -w 1.pcap
-tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.152.15.96  -w 3.pcap
+#tcpdump -i bond0 -nnnAs 0 tcp port 9011 and ip src 10.148.5.231 -w 1.pcap
+#tcpdump -i bond0 -XnnnAs 0 tcp port 9011 and ip src 10.148.5.231 -w 1.pcap
+#tcpdump -i bond0 -Xnns 0 tcp port 9011 and ip src 10.148.5.231 -r 1.pcap|more
+#tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.148.5.231 -w 1.pcap
+#tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.148.5.231 -r 1.pcap
+#tcpdump -i bond0 -Xnns 0 tcp port 9011  -w 1.pcap
+#tcpdump -i bond0 -Xnns 400 tcp port 9011 and host 10.133.9.178  -w 1.pcap
+#tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.152.15.96  -w 3.pcap
+#curl -d "city=dongguan&appkey=8010132dcf54491a4eaa387f4db61774" "https://way.jd.com/he/freeweather"
 
