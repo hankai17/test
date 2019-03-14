@@ -21,6 +21,11 @@ for n in $(seq $number); do
   `cp 0.html $n.html`	
 done
 
+number=100
+for n in $(seq $number); do
+  `curl -vx 127.0.0.1:8080 -o /dev/null "http://127.0.0.1:80/$n.html"`
+done
+
 function run() {
   number=$1
   shift
