@@ -121,5 +121,6 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #tcpdump -i bond0 -Xnns 0 tcp port 9011 and host 10.152.15.96  -w 3.pcap
 # tcpdump -Xnns 0 -i any port 80 > 1.txt baosaisai
 #curl -d "city=dongguan&appkey=8010132dcf54491a4eaa387f4db61774" "https://way.jd.com/he/freeweather"
-tcpdump -i bond0 -nnnAs 0 ip src 10.71.254.6 or 10.85.2.130 or ip dst 10.71.254.6 -w 4.10.pcap
+#tcpdump -i bond0 -nnnAs 0 ip src 10.71.254.6 or 10.85.2.130 or ip dst 10.71.254.6 -w 4.10.pcap
+#tcpdump -i any -nnnAs 0 tcp or udp -w 1.pcap
 
