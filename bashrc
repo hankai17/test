@@ -123,4 +123,6 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #curl -d "city=dongguan&appkey=8010132dcf54491a4eaa387f4db61774" "https://way.jd.com/he/freeweather"
 #tcpdump -i bond0 -nnnAs 0 ip src 10.71.254.6 or 10.85.2.130 or ip dst 10.71.254.6 -w 4.10.pcap
 #tcpdump -i any -nnnAs 0 tcp or udp -w 1.pcap
+#tcpdump -Xnns 0 -i any port 5005 赛赛看包很溜
+
 
