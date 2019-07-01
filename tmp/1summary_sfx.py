@@ -3,9 +3,7 @@
 import os, sys
 from urlparse import *
 
-#'2019-06-17/09:30:03' '10.129.0.157' '10.148.29.41' '10.129.0.157' 'GET' 'http/1.1' 'wn.pos.baidu.com' 'http://wn.pos.baidu.com/adx.php?c=d25pZD0zODlmMTUxZmQxZTA5ZDgzAHM9Mzg5ZjE1MWZkMWUwOWQ4MwB0PTE1NjA3MzUwNTcAc2U9MgBidT00AHByaWNlPVhRYnRVUUFLNThCN2pFcGdXNUlBOGx3bkpyaUJjV1VHM2JMd2l3AGNoYXJnZV9wcmljZT03OQBzaGFyaW5nX3ByaWNlPTc5MDAwAHdpbl9kc3A9NABjaG1kPTEAYmRpZD0AY3Byb2lkPQB3ZD0wAHR1PTYxNDEwNzUAYWRjbGFzcz0xMwBzcmN0PTEAcG9zPTAAYmNobWQ9MAB0bT0yNzUxNDU0NTYAYXBwPWI5ZGUzOTkyAHY9MQBpPTZhMGNlNzEy' 'Dalvik/2.1.0 (Linux; U; Android 5.1; OPPO R9tm Build/LMY47I)' '-' 'image/gif' '200' 'MISS' '80' '464' ' 17/Jun/2019:09:30:03 +0800' '1560735003942' '0' '' '' 'wn.pos.baidu.com' '183.232.231.200' '' '' '' '' '' '000' 'FIN' '-' '-' '49' '-' '49' '' '80' '' '1560735003942' '1560735003942' '1560735003983'
-
-#{ 'nil': 0, 'null': 0, 'php' : 0, 'jpg' : 0, 'webp' : 0, 'mp4' : 0, 'js' : 0, 'jpeg' : 0, 'unio' : 0, 'html' : 0, 'gif' : 0, 'imag' : 0, 'png' : 0, 'css' : 0, 'm3u8' : 0, 'json' : 0, 'apk' : 0, 'dat' : 0, 'ini' : 0, 'mp3' : 0}
+sfx_log = { 'nil': 0, 'null': 0, 'php' : 0, 'jpg' : 0, 'webp' : 0, 'mp4' : 0, 'js' : 0, 'jpeg' : 0, 'unio' : 0, 'html' : 0, 'gif' : 0, 'imag' : 0, 'png' : 0, 'css' : 0, 'm3u8' : 0, 'json' : 0, 'apk' : 0, 'dat' : 0, 'ini' : 0, 'mp3' : 0, 'image':0, 'union':0}
 
 filename = sys.argv[1]
 
@@ -25,9 +23,10 @@ def get_suffix(p):
         return "nil"
     fields = p.split(".")
     if len(fields) == 0 or len(fields) == 1:
-        #return "no sfx"
+        print p
         return "null"
-    return fields[1]
+    #print fields[len(fields) - 1]
+    return fields[len(fields) - 1]
 
 for line in fd.readlines():
     fields = line.strip().split("'")
@@ -44,7 +43,13 @@ for line in fd.readlines():
     result = urlparse(fields[15])
 
     sfx = get_suffix(result.path)
-    #print sfx 
+    if len(sfx) > 6:
+        continue
+    if sfx == "v3":
+        print line
+        break
+    if not sfx_log.has_key(sfx):
+        print sfx
 
     #ddomain = process_domain(domain)
     #print ddomain
@@ -53,7 +58,7 @@ for line in fd.readlines():
         continue
 
     if not logs.has_key(ddomain):
-        logs[ddomain] = {'nil': 0, 'null': 0, 'php' : 0, 'jpg' : 0, 'webp' : 0, 'mp4' : 0, 'js' : 0, 'jpeg' : 0, 'unio' : 0, 'html' : 0, 'gif' : 0, 'imag' : 0, 'png' : 0, 'css' : 0, 'm3u8' : 0, 'json' : 0, 'apk' : 0, 'dat' : 0, 'ini' : 0, 'mp3' : 0, 'ico' : 0 , 'gif' : 0}
+        logs[ddomain] = {'nil': 0, 'null': 0, 'php' : 0, 'jpg' : 0, 'webp' : 0, 'mp4' : 0, 'js' : 0, 'jpeg' : 0, 'unio' : 0, 'html' : 0, 'gif' : 0, 'imag' : 0, 'png' : 0, 'css' : 0, 'm3u8' : 0, 'json' : 0, 'apk' : 0, 'dat' : 0, 'ini' : 0, 'mp3' : 0, 'ico' : 0 , 'gif' : 0, 'image':0, 'union':0}
     if 'nil' in sfx:
         logs[ddomain]['nil'] += 1
     if 'null' in sfx:
@@ -72,7 +77,7 @@ for line in fd.readlines():
         logs[ddomain]['jpeg'] += 1
     if 'html' in sfx:
         logs[ddomain]['html'] += 1
-    if 'png' in sfx:
+    if 'png' in sfx or 'PNG' in sfx:
         logs[ddomain]['png'] += 1
     if 'css' in sfx:
         logs[ddomain]['css'] += 1
@@ -92,6 +97,10 @@ for line in fd.readlines():
         logs[ddomain]['ico'] += 1
     if 'gif' in sfx:
         logs[ddomain]['gif'] += 1
+    if 'image' in sfx:
+        logs[ddomain]['image'] += 1
+    if 'union' in sfx:
+        logs[ddomain]['union'] += 1
 for k in logs.keys():
     #print k, logs[k]['nil'], logs[k]['null'],logs[k]['php'],logs[k]['jpg'],logs[k]['webp'],logs[k]['mp4'],logs[k]['js'],logs[k]['jpeg'],logs[k]['html'],logs[k]['png'],logs[k]['css'],logs[k]['m3u8'],logs[k]['json'],logs[k]['apk'],logs[k]['dat'],logs[k]['ini'],logs[k]['mp3']
     print k,
