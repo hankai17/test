@@ -108,14 +108,12 @@ handle_io(TSCont contp, TSEvent event, void * /* edata ATS_UNUSED */)
     // we don't care about the request, so just shut down the read vc
     TSVConnShutdown(cstate->net_vc, 1, 0);
     // setup the response headers so we are ready to write body
-    char hdrs[]         = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-length: 6\r\n\r\n123456";
+    //char hdrs[]         = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-length: 205\r\nAccept-Ranges: bytes\r\nCache-Control: max-age=60476\r\nConnection: close\r\n\r\n";
+    char hdrs[]         = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nAccept-Ranges: bytes\r\nCache-Control: max-age=60476\r\nConnection: close\r\n\r\n"; //死循环
     cstate->total_bytes = TSIOBufferWrite(cstate->resp_buffer, hdrs, sizeof(hdrs) - 1);
-
-    //char head[] = "<h3>Cache Contents:</h3>\n<p><pre>\n";
-    //cstate->total_bytes += TSIOBufferWrite(cstate->resp_buffer, head, sizeof(head) - 1);
-    cstate->write_vio  = TSVConnWrite(cstate->net_vc, contp, cstate->resp_reader, INT64_MAX);
-    //TSVIONBytesSet(cstate->write_vio, cstate->total_bytes);
-    //TSVIOReenable(cstate->write_vio);
+    cstate->write_vio  = TSVConnWrite(cstate->net_vc, contp, cstate->resp_reader, INT64_MAX); //为了能走write_ready
+    TSDebug(PLUGIN_NAME, "handle_io sizeof(hdrs): %d, cstate->total_bytes: %d\n", sizeof(hdrs) - 1, cstate->total_bytes);
+    //TSVIONBytesSet(cstate->write_vio, cstate->total_bytes); //直接103 Empty reply from server
 
     return 0;
   } break;
@@ -123,8 +121,12 @@ handle_io(TSCont contp, TSEvent event, void * /* edata ATS_UNUSED */)
     TSDebug(PLUGIN_NAME, "handle_io write_ready");
     TSDebug(PLUGIN_NAME, "ndone: %" PRId64 " total_bytes: % " PRId64, TSVIONDoneGet(cstate->write_vio), cstate->total_bytes);
     cstate->write_pending = false;
-    // the cache scan handler should call vio reenable when there is
-    // available data
+    char hdrs1[] = "<?xml version=\"1.0\"?>\r\n<!DOCTYPE cross-domain-policy SYSTEM \"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd\">\r\n<cross-domain-policy>\r\n    <allow-access-from domain=\"*\"/>\r\n</cross-domain-policy>";
+    cstate->total_bytes += TSIOBufferWrite(cstate->resp_buffer, hdrs1, sizeof(hdrs1) - 1);
+    //cstate->write_vio = TSVConnWrite(cstate->net_vc, contp, cstate->resp_reader, INT64_MAX);
+    cstate->write_vio = TSVConnWrite(cstate->net_vc, contp, cstate->resp_reader, sizeof(hdrs1) - 1); //不用cl 就得这样搞
+    //TSVIONBytesSet(cstate->write_vio, cstate->total_bytes); //可有可无?
+
     TSVIOReenable(cstate->write_vio);
     return 0;
   } break;
