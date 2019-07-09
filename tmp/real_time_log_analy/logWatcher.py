@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 
-"""
-https://github.com/fayetted/logWatch
-Real time log files watcher supporting log rotation.
-Original Author: Giampaolo Rodola' <g.rodola [AT] gmail [DOT] com>
-License: MIT
-"""
-
 import os
 import sys
 import time
@@ -15,39 +8,35 @@ import stat
 import datetime
 import socket
 import struct
+import logging
 
-from lru import LRUCacheDict
+#from lru import LRUCacheDict
+from logging import handlers
 from task_manager import Job, taskManage
 from ctypes import *
+from urlparse import *
 
-pps_ip = "10.0.110.82"
-pps_port = 7545
+logger = logging.getLogger(__name__)
+log_file = "timelog.log"
+domain_white_list = {}
+
+fh = handlers.TimedRotatingFileHandler(filename=log_file,when="H",interval=12,backupCount=0)
+formatter = logging.Formatter('%(asctime)s: %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+def get_suffix(p):
+    if len(p) == 1:
+        #return "pure domain"
+        return "nil"
+    fields = p.split(".")
+    if len(fields) == 0 or len(fields) == 1:
+        #return "no sfx"
+        return "null"
+    return fields[len(fields) - 1]
 
 class LogWatcher(object):
-    """Looks for changes in all files of a directory.
-    This is useful for watching log file changes in real-time.
-    It also supports files rotation.
-    Example:
-    >>> def callback(filename, lines):
-    ...     print filename, lines
-    ...
-    >>> l = LogWatcher("/var/log/", callback)
-    >>> l.loop()
-    """
-
     def __init__(self, folder, callback, extensions=["log"], logfile_keyword="squid", tail_lines=0):
-        """Arguments:
-        (str) @folder:
-            the folder to watch
-        (callable) @callback:
-            a function which is called every time a new line in a 
-            file being watched is found; 
-            this is called with "filename" and "lines" arguments.
-        (list) @extensions:
-            only watch files with these extensions
-        (int) @tail_lines:
-            read last N lines from files being watched before starting
-        """
         self.files_map = {}
         self.callback = callback
         self.folder = os.path.realpath(folder)
@@ -56,8 +45,6 @@ class LogWatcher(object):
         assert os.path.exists(self.folder), "%s does not exists" % self.folder
         assert callable(callback)
         self.update_files()
-        # The first time we run the script we move all file markers at EOF.
-        # In case of files created afterwards we don't do this.
         for id, file in self.files_map.iteritems():
             file.seek(os.path.getsize(file.name))  # EOF
             if tail_lines:
@@ -68,10 +55,7 @@ class LogWatcher(object):
     def __del__(self):
         self.close()
 
-    def loop(self, interval=0.1, async=False):
-        """Start the loop.
-        If async is True make one loop then return.
-        """
+    def loop(self, interval=0.05, async=False):
         while 1:
             try:
                 self.update_files()
@@ -84,14 +68,9 @@ class LogWatcher(object):
                 break
 
     def log(self, line):
-        """Log when a file is un/watched"""
         print line
 
     def listdir(self):
-        """List directory and filter files by extension.
-        You may want to override this to add extra logic or
-        globbling support.
-        """
         ls = os.listdir(self.folder)
         if self.extensions:
             return [x for x in ls if os.path.splitext(x)[1][1:] in self.extensions and self.logfile_kw in os.path.split(x)[1]  ]
@@ -100,7 +79,6 @@ class LogWatcher(object):
 
     @staticmethod
     def tail(fname, window):
-        """Read last N lines from file fname."""
         try:
             f = open(fname, 'r')
         except IOError, err:
@@ -131,7 +109,6 @@ class LogWatcher(object):
 
     def update_files(self):
         ls = []
-        # If self.folder is a directory/folder then add all the files in it to the list.
         if os.path.isdir(self.folder):
             for name in self.listdir():
                 absname = os.path.realpath(os.path.join(self.folder, name))
@@ -145,9 +122,7 @@ class LogWatcher(object):
                         continue
                     fid = self.get_file_id(st)
                     ls.append((fid, absname))
-        # Allow a single file to be passed instead of a directory/folder
         elif os.path.isfile(self.folder):
-#             print '{0}: is a file'.format( self.folder )
             absname = os.path.realpath(self.folder)
             try:
                 st = os.stat(absname)
@@ -155,16 +130,12 @@ class LogWatcher(object):
                 if err.errno != errno.ENOENT:
                     raise
             else:
-#                 if not stat.S_ISREG(st.st_mode):
-#                     continue
                 fid = self.get_file_id(st)
                 ls.append((fid, absname))
-#             sys.exit()
         else:
             print 'You submitted an object that was neither a file or folder...exiting now.'
             sys.exit()
 
-        # check existent files
         for fid, file in list(self.files_map.iteritems()):
             try:
                 st = os.stat(file.name)
@@ -175,11 +146,9 @@ class LogWatcher(object):
                     raise
             else:
                 if fid != self.get_file_id(st):
-                    # same name but different file (rotation); reload it.
                     self.unwatch(file, fid)
                     self.watch(file.name)
 
-        # add new ones
         for fid, fname in ls:
             if fid not in self.files_map:
                 self.watch(fname)
@@ -201,9 +170,6 @@ class LogWatcher(object):
             self.files_map[fid] = file
 
     def unwatch(self, file, fid):
-        # file no longer exists; if it has been renamed
-        # try to read it for the last time in case the
-        # log rotator has written something in it.
         lines = self.readfile(file)
         self.log("un-watching logfile %s" % file.name)
         del self.files_map[fid]
@@ -221,58 +187,110 @@ class LogWatcher(object):
 
 def udp_send_message(ip, port, arr):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    #for data in arr:
     s.sendto(arr, (ip, port))
     s.close()
         
 
 def pull_data(job):
-    #print "job cb", job.url
+    if not (job.sfx == "nil" or job.sfx == "null"):
+        fmt = "HHHH%dsH%dsH" %(len(job.url),len(job.sfx))
+        data = struct.pack(
+            fmt,
+            80,      #id
+            1,       #type
+            8 + len(job.url) + 2 + len(job.sfx) + 1, #length
+            len(job.url), #domain_len
+            job.url,      #domain
+            len(job.sfx), #sfx_len
+            job.sfx,      #sfx
+            0
+        )
+    else:
+        fmt = "HHHH%dsH" %(len(job.url))
+        data = struct.pack(
+            fmt,
+            80,      #id
+            1,       #type
+            8 + len(job.url) + 1, #length
+            len(job.url), #domain_len
+            job.url,
+            0
+        )
 
-    data = struct.pack(
-        '=HHHH200s',
-        80, #id
-        1, #type
-        200 + 8, #length
-        len(job.url), #domain_len
-        job.url #domain
-    )
-    #print "data send to pps len: ", len(data)
-    udp_send_message(pps_ip, pps_port, data)
+    udp_send_message(settings['pps_ip'], settings['pps_port'], data)
     tmg.done_task_add(job)
+    log_message = job.url + ' ' + job.sfx
+    logger.warning(log_message)
 
 def callback_routine(idx):
     print 'callback_routinue'
 
+settings={
+    'interval':10,
+    'hit':1,
+    'domain_sfx_err_rate':0,
+    'domain_sfx_err_count':1,
+    'local_ip':'10.0.110.21',
+    'pps_ip':'10.0.110.82',
+    'pps_port':7111
+}
+
 cur_time = float(time.time())
 txn_idx = 0
 if __name__ == '__main__':
-    d = LRUCacheDict(max_size=60, expiration=60)
+    d1 = {}
     tmg = taskManage()
     tmg.run()
     def callback(filename, lines):
         for line in lines:
-            #print line
-	    fields = line.strip().split("'")
-	    http_code = fields[23]
-	    domain = fields[13]
-    	    if len(domain) < 3:
-        	continue
-	    if not(http_code in "200" or http_code in "206" or http_code in "304"):
-		#print "will pull data to pps", domain
-		d[domain] = 1
-	    global cur_time
-	    global txn_idx
-	    if float(time.time()) - cur_time >= 10:
-		cur_time = float(time.time())
-		print "------>"
-		d.traversal1()
-		print "<------"
-		for i in d.traversal_weight_gt(0):
-		    txn_idx += 1
-		    job = Job(txn_idx, pull_data, time.time(), 0, i, '', callback_routine, '')
-		    tmg.task_add(job)
-		d.clear()
+            fields = line.strip().split("'")
+            http_code = fields[23]
+            domain = fields[13]
+            if len(domain.split(":")) > 0:
+                domain = domain.split(":")[0]
+            user_ip = fields[5]
+            result = urlparse(fields[15])
+            sfx = get_suffix(result.path)
+            #print fields[15], sfx
+
+            if len(domain) <= 3:
+                continue
+            #is watch req
+            if user_ip == settings['local_ip']:
+                continue
+            
+            sfx_dict = None
+            if not d1.has_key(domain):
+                d1[domain] = {}
+                sfx_dict = d1[domain]
+            else:
+                sfx_dict = d1[domain]
+
+            if not sfx_dict.has_key(sfx):
+                sfx_dict[sfx] = {'20x':0, 'not_ok':0}
+
+            if not(http_code in "200" or http_code in "206" or http_code in "304"): 
+                sfx_dict[sfx]['not_ok'] += 1
+            else:
+                sfx_dict[sfx]['20x'] += 1
+
+            global cur_time
+            global txn_idx
+            if float(time.time()) - cur_time >= settings['interval']:
+                cur_time = float(time.time())
+                print "------>"
+                for k in d1.keys():
+                        #print k, d1[k]
+                    for k1 in d1[k].keys():
+                        err_rate = d1[k][k1]['not_ok'] * 100 / (d1[k][k1]['not_ok'] + d1[k][k1]['20x'])
+                        #print k1, err_rate
+                        if err_rate >= settings['domain_sfx_err_rate'] and (d1[k][k1]['not_ok'] + d1[k][k1]['20x']) >= settings['domain_sfx_err_count'] :
+                            print "will add to task", k, k1, err_rate
+                            txn_idx += 1
+                            job = Job(txn_idx, pull_data, time.time(), 0, k, '', callback_routine, k1, '')
+                            tmg.task_add(job)
+                print "<------"
+                d1.clear()
 
     l = LogWatcher("/opt/ats/var/log/trafficserver", callback)
     l.loop()
