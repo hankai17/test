@@ -36,3 +36,5 @@ int main(void) {
 }
 
 //block --> pending --> deliver 必须有这个场景
+
+//ppc源码的主线程中 首先屏蔽alarm sigpipe 而且还设了忽略sigpipe
