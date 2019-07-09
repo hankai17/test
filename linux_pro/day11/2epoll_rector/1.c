@@ -68,7 +68,7 @@ void init_get_stream_info_task() {
         }
         return;
 }
-
+signal(SIGPIPE, SIG_IGN);
 int epoll_svc(void* arg) {
         g_last_modified_time = 0;
         g_efd = epoll_create(MAX_EVENTS + 1);
@@ -98,7 +98,7 @@ int epoll_svc(void* arg) {
                 }
 
                 int nfd = epoll_wait(g_efd, events, MAX_EVENTS + 1, 1000);
-                if (nfd < 0) {
+                if (nfd < 0 && errno != EINTR) {
                     printf("epoll_wait err %s\n", strerror(errno));
                     break;
                 }
