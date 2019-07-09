@@ -2,54 +2,75 @@
 
 import os
 import sys
-import time
-import errno
-import stat
+import socket
 import struct
 
-from ctypes import *
+pps_ip = "10.0.110.82"
+pps_port = 7111
 
-class Item(Structure):
-    _fields_ = [
-    ('id', c_uint16),
-    ('type', c_uint16),
-    ('length', c_uint16),
-    ('domain_len', c_uint16),
-    #('domain_start', c_char_p)
-    ('domain_start', c_void_p)
-    ]
-
-'''
-pd = Item()
-pd.id = 1
-pd.type = 2
-pd.length = 3
-pd.domain_len = 4
-pd.domain_start = "www.ifeng.com"
-
-#pd.domain_len = len("www.ifeng.com")
-#pd.domain_start = "www.ifeng.com"
-
-#print (string_at(addressof(pd),sizeof(pd)))
-print sizeof(pd)
-
-fd = open('test_struct', 'wb+')
-fd.write(string_at(addressof(pd),sizeof(pd)))
-fd.close()
-'''
+def udp_send_message(ip, port, arr):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    #for data in arr:
+    s.sendto(arr, (ip, port))
+    s.close()
+        
 
 data = struct.pack(
-#'=H1024',
-'HHHH1024s',
-4,
-3,
-2,
-1,
-'www.ifeng.com'
+    '=HHH%ds'%
+    80, #id
+    1, #type
+    200 + 8, #length
+    len('www.ifeng.com'), #domain_len
+    'www.ifeng.com' #domain
 )
 
+'''
+data1 = struct.pack(
+    '=HHHH%ds%ds'%
+    80, #id
+    1, #type
+    200 + 8, #length
+    len('www.ifeng.com'), #domain_len
+    'www.ifeng.com', #domain
+    len('exe'),
+    'exe'
+)
+'''
+
+data2 = struct.pack(
+    'HHHH%ds'%
+    0,
+    1,
+    2,
+    len('www.baidu.com'),
+    len('www.baidu.com'), 'www.baidu.com'
+)
+
+data3 = struct.pack(
+    'H13s',
+    4,
+    'www.baidu.com'
+)
+
+s = 'www.baidu.com'
+data = struct.pack("H%ds" % 
+        (len(s),), 
+        len(s), 
+        s
+)
 print data
 
-fd = open('test_struct', 'wb+')
-fd.write(data)
-fd.close()
+fmt = "HHHH%dsH%ds" %(len('www.baidu.com'),len('exe'))
+data4 = struct.pack(
+    fmt,
+    0,
+    1,
+    2,
+    4,
+    'www.baidu.com',
+    5,
+    'exe'
+)
+
+#print "data send to pps len: ", len(data)
+udp_send_message(pps_ip, pps_port, data4)
