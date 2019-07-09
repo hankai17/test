@@ -27,7 +27,7 @@ def get_suffix(p):
     if len(fields) == 0 or len(fields) == 1:
         #return "no sfx"
         return "null"
-    return fields[1]
+    return fields[len(fields) - 1]
 
 for line in fd.readlines():
     fields = line.strip().split("'")
