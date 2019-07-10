@@ -72,12 +72,12 @@ class LogWatcher(object):
 
     def listdir(self):
         ls = os.listdir(self.folder)
-        if self.extensions:
+        if self.extensions: #os.path 常用方法 可以直接获取文件名之类   不知道可不可以分割出来url   可以直接提取sfx
             return [x for x in ls if os.path.splitext(x)[1][1:] in self.extensions and self.logfile_kw in os.path.split(x)[1]  ]
         else:
             return ls
 
-    @staticmethod
+    @staticmethod #跟c++中的静态方法一样 不用实例化 可以直接用 
     def tail(fname, window):
         try:
             f = open(fname, 'r')
@@ -86,7 +86,7 @@ class LogWatcher(object):
                 return []
             else:
                 raise
-        else:
+        else:  #如果try里面的语句成功执行,那么就执行else里面的语句
             BUFSIZ = 1024
             f.seek(0, os.SEEK_END)
             fsize = f.tell()
@@ -105,7 +105,7 @@ class LogWatcher(object):
                     break
                 else:
                     block -= 1
-            return data.splitlines()[-window:]
+            return data.splitlines()[-window:] #取后几行
 
     def update_files(self):
         ls = []
@@ -118,10 +118,10 @@ class LogWatcher(object):
                     if err.errno != errno.ENOENT:
                         raise
                 else:
-                    if not stat.S_ISREG(st.st_mode):
+                    if not stat.S_ISREG(st.st_mode): #一般文件 
                         continue
                     fid = self.get_file_id(st)
-                    ls.append((fid, absname))
+                    ls.append((fid, absname)) #数组里是元组
         elif os.path.isfile(self.folder):
             absname = os.path.realpath(self.folder)
             try:
@@ -169,10 +169,10 @@ class LogWatcher(object):
             self.log("watching logfile %s" % fname)
             self.files_map[fid] = file
 
-    def unwatch(self, file, fid):
+    def unwatch(self, file, fid): #unwatch时 也要读文件?
         lines = self.readfile(file)
         self.log("un-watching logfile %s" % file.name)
-        del self.files_map[fid]
+        del self.files_map[fid] #map的删除
         if lines:
             self.callback(file.name, lines)
 
