@@ -1,2 +1,2 @@
-Tis is my stack of technology. There containing c/c++/c11/boost/go... linux_base and so on.
+This is my technology stack. There containing c/c++/c11/boost/go... linux_base and so on.
 I'll keep updating :)
