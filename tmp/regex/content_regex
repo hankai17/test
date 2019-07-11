@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+#encoding: utf-8
+
+import urllib2
+import re, time, datetime
+
+class ContentRegex:
+    #类内部定义的常量,外面不需要使用
+    PATTERN = r'<B>([^<>"]+)</B>'
+    TIME_FORMAT3 = '%Y-%m-%dT%H:%M:%S'
+    TIME_FORMAT2 = '%a, %d %b %Y %H:%M:%S GMT'
+
+    def __init__(self, ats, url):
+        self.server = ats
+        self.url = url
+        self.query = 'http://' + ats + '/cache/lookup_regex?url=' + url
+
+    def get_date(self):
+        return time.strftime(ContentQuery.TIME_FORMAT3)
+
+    def datetime_switch(self, dt, fmt):
+        tm = time.mktime(time.strptime(dt, ContentQuery.TIME_FORMAT2))
+        local_time = time.localtime(tm)
+        dt = time.strftime(fmt, local_time)
+        return dt
+
+    def get_object(self):
+        req = urllib2.Request(self.query)
+        resp = urllib2.urlopen(req)
+        page = resp.read()
+        return page
+
+    def check_exist(self, data):
+        exist = 0
+        try:
+            pattern = re.compile(ContentRegex.PATTERN, re.M | re.S)
+            #print pattern.pattern
+            match = pattern.search(data)
+            if match:
+                print match.group(1)
+                exist = 1
+        except Exception:
+            pass
+        return exist
+
+    #解析获取的内容,找到想要的字段
+    def parse_query_content(self, data):
+        existed = self.check_exist(data)
+        return {'exist':str(existed)}
+
+
+'''
+if __name__ == '__main__':
+    #ATS所在的ip和port,用冒号分隔:
+    proxy = '10.10.110.162:8081'
+    #要查询的url
+    url = 'http://history.sohu.com/20151124/n427833369.shtml'
+    cr = ContentRegex(proxy, url)
+    obj = cr.get_object()
+    print cr.parse_query_content(obj)
+'''
