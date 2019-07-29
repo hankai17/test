@@ -8,6 +8,7 @@ import stat
 import datetime
 import socket
 import struct
+import atexit
 import logging
 
 #from lru import LRUCacheDict
@@ -15,25 +16,55 @@ from logging import handlers
 from task_manager import Job, taskManage
 from ctypes import *
 from urlparse import *
+from multiprocessing import Process,Lock
+from log_obj import CLog
+from parse_conf import  cConfParser
 
-logger = logging.getLogger(__name__)
 log_file = "timelog.log"
-domain_white_list = {}
+log_fmt = '%(asctime)s: %(message)s'
+config_file = 'test.config'
 
-fh = handlers.TimedRotatingFileHandler(filename=log_file,when="H",interval=12,backupCount=0)
-formatter = logging.Formatter('%(asctime)s: %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+domain_white_dict = {}
+pps_ip_list = []
+pps_port = 0
+domain_sfx_err_count = 0
+domain_sfx_err_rate = 0
+ats_ip = ''
+
+def daemonize(pid_file=None):
+    pid = os.fork()
+    if pid:
+        sys.exit(0)
+    os.chdir('/')
+    os.umask(0)
+    os.setsid()
+    _pid = os.fork()
+    if _pid:
+        sys.exit(0)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    with open('/dev/null') as read_null, open('/dev/null', 'w') as write_null:
+        os.dup2(read_null.fileno(), sys.stdin.fileno())
+        os.dup2(write_null.fileno(), sys.stdout.fileno())
+        os.dup2(write_null.fileno(), sys.stderr.fileno())
+
+    if pid_file:
+        with open(pid_file, 'w+') as f:
+            f.write(str(os.getpid()))
+        atexit.register(os.remove, pid_file)
 
 def get_suffix(p):
     if len(p) == 1:
         #return "pure domain"
         return "nil"
-    fields = p.split(".")
+    fields = p.split("/")
     if len(fields) == 0 or len(fields) == 1:
-        #return "no sfx"
         return "null"
-    return fields[len(fields) - 1]
+    fields1 = fields[len(fields) - 1].split(".")
+    if len(fields1) == 0 or len(fields1) == 1:
+        return "null"
+    else:
+        return fields1[len(fields1) - 1]
 
 class LogWatcher(object):
     def __init__(self, folder, callback, extensions=["log"], logfile_keyword="squid", tail_lines=0):
@@ -55,7 +86,7 @@ class LogWatcher(object):
     def __del__(self):
         self.close()
 
-    def loop(self, interval=0.05, async=False):
+    def loop(self, interval=0.1, async=False):
         while 1:
             try:
                 self.update_files()
@@ -72,12 +103,12 @@ class LogWatcher(object):
 
     def listdir(self):
         ls = os.listdir(self.folder)
-        if self.extensions: #os.path 常用方法 可以直接获取文件名之类   不知道可不可以分割出来url   可以直接提取sfx
+        if self.extensions:
             return [x for x in ls if os.path.splitext(x)[1][1:] in self.extensions and self.logfile_kw in os.path.split(x)[1]  ]
         else:
             return ls
 
-    @staticmethod #跟c++中的静态方法一样 不用实例化 可以直接用 
+    @staticmethod
     def tail(fname, window):
         try:
             f = open(fname, 'r')
@@ -86,7 +117,7 @@ class LogWatcher(object):
                 return []
             else:
                 raise
-        else:  #如果try里面的语句成功执行,那么就执行else里面的语句
+        else:
             BUFSIZ = 1024
             f.seek(0, os.SEEK_END)
             fsize = f.tell()
@@ -105,7 +136,7 @@ class LogWatcher(object):
                     break
                 else:
                     block -= 1
-            return data.splitlines()[-window:] #取后几行
+            return data.splitlines()[-window:]
 
     def update_files(self):
         ls = []
@@ -118,10 +149,10 @@ class LogWatcher(object):
                     if err.errno != errno.ENOENT:
                         raise
                 else:
-                    if not stat.S_ISREG(st.st_mode): #一般文件 
+                    if not stat.S_ISREG(st.st_mode):
                         continue
                     fid = self.get_file_id(st)
-                    ls.append((fid, absname)) #数组里是元组
+                    ls.append((fid, absname))
         elif os.path.isfile(self.folder):
             absname = os.path.realpath(self.folder)
             try:
@@ -169,10 +200,10 @@ class LogWatcher(object):
             self.log("watching logfile %s" % fname)
             self.files_map[fid] = file
 
-    def unwatch(self, file, fid): #unwatch时 也要读文件?
+    def unwatch(self, file, fid):
         lines = self.readfile(file)
         self.log("un-watching logfile %s" % file.name)
-        del self.files_map[fid] #map的删除
+        del self.files_map[fid]
         if lines:
             self.callback(file.name, lines)
 
@@ -185,115 +216,195 @@ class LogWatcher(object):
             file.close()
         self.files_map.clear()
 
-def udp_send_message(ip, port, arr):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.sendto(arr, (ip, port))
-    s.close()
+def udp_send_message(ip_list, port, arr):
+    for ip in ip_list:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.sendto(arr, (ip, port))
+        s.close()
         
 
 def pull_data(job):
     if not (job.sfx == "nil" or job.sfx == "null"):
-        fmt = "HHHH%dsH%dsH" %(len(job.url),len(job.sfx))
-        data = struct.pack(
-            fmt,
-            80,      #id
-            1,       #type
-            8 + len(job.url) + 2 + len(job.sfx) + 1, #length
-            len(job.url), #domain_len
-            job.url,      #domain
-            len(job.sfx), #sfx_len
-            job.sfx,      #sfx
+	fmt = "=HHHH%dsH%dsH" %(len(job.url),len(job.sfx))
+    	data = struct.pack(
+	    fmt,
+    	    80,      #id
+    	    1,       #type
+    	    8 + len(job.url) + 2 + len(job.sfx) + 1, #length
+    	    len(job.url), #domain_len
+    	    job.url,      #domain
+    	    len(job.sfx), #sfx_len
+    	    job.sfx,      #sfx
             0
-        )
+    	)
     else:
-        fmt = "HHHH%dsH" %(len(job.url))
-        data = struct.pack(
-            fmt,
-            80,      #id
-            1,       #type
-            8 + len(job.url) + 1, #length
-            len(job.url), #domain_len
-            job.url,
-            0
-        )
-
-    udp_send_message(settings['pps_ip'], settings['pps_port'], data)
+	fmt = "=HHHH%dsH" %(len(job.url))
+    	data = struct.pack(
+	    fmt,
+    	    80,      #id
+    	    1,       #type
+    	    8 + len(job.url) + 1, #length
+    	    len(job.url), #domain_len
+	    job.url,
+	    0
+	)
+    global pps_ip_list
+    global pps_port	
+    udp_send_message(pps_ip_list, pps_port, data)
     tmg.done_task_add(job)
     log_message = job.url + ' ' + job.sfx
-    logger.warning(log_message)
+    loger.write(20, log_message)
 
 def callback_routine(idx):
     print 'callback_routinue'
 
-settings={
-    'interval':10,
-    'hit':1,
-    'domain_sfx_err_rate':0,
-    'domain_sfx_err_count':1,
-    'local_ip':'10.0.110.21',
-    'pps_ip':'10.0.110.82',
-    'pps_port':7111
-}
+def get_domain_white(f):
+    if len(f) == 0:
+	print 'No domain_white_list'
+	return
+    filename = f 
+    fd = open(filename, 'r')
+    for line in fd.readlines():
+	line = line.strip()
+	if not domain_white_dict.has_key(line):
+	    domain_white_dict[line] = 1
+    print 'parse domain_white_list done'
 
-cur_time = float(time.time())
+def period_check_task(job):
+    global txn_idx
+    global once_flag
+    if txn_idx == 0 and once_flag == 0:
+	once_flag = 1
+    	tmg.done_task_add(job)
+        job.addtime = time.time()
+        tmg.task_add(job)
+	return
+	
+    loger.write(10, '------>')
+    mutex.acquire()
+    for k in d1.keys():
+        if domain_white_dict.has_key(k):
+            continue
+        for k1 in d1[k].keys():
+            err_rate = d1[k][k1]['not_ok'] * 100 / (d1[k][k1]['not_ok'] + d1[k][k1]['20x'])
+	    log_message = k +  ' ' + str(err_rate)
+    	    loger.write(10, log_message)
+	    global domain_sfx_err_count
+	    global domain_sfx_err_rate
+            if err_rate >= domain_sfx_err_rate and (d1[k][k1]['not_ok'] + d1[k][k1]['20x']) >= domain_sfx_err_count :
+                #print "will add to task", k, k1, "ok:", d1[k][k1]['20x'], "not_ok:", d1[k][k1]['not_ok'], "err rate:", err_rate
+                txn_idx += 1
+                job = Job(txn_idx, pull_data, time.time(), 0, k, '', callback_routine, k1, '')
+                tmg.task_add(job)
+    loger.write(10, '<------')
+    d1.clear()
+    mutex.release()
+
+    tmg.done_task_add(job)
+    if job.period > 0:
+        job.addtime = time.time()
+        tmg.task_add(job)
+
+def config_parse():
+    global domain_sfx_err_count
+    global domain_sfx_err_rate
+    global pps_ip_list
+    global pps_port
+    global ats_ip
+    cp = cConfParser(config_file)
+    pps_ip = cp.get('common', 'pps_ip')
+    fields = pps_ip.strip().split('|')
+    if len(fields) > 0:
+	for i in fields:
+	    pps_ip_list.append(i)
+    else:
+	pps_ip_list.append(pps_ip)
+
+    pps_port = int(cp.get('common', 'pps_port'))
+    domain_sfx_err_count = int(cp.get('common', 'domain_sfx_err_count' ))
+    domain_sfx_err_rate = int(cp.get('common', 'domain_sfx_err_rate' ))
+    ats_ip = cp.get('common', 'ats_ip')
+
+    print 'ats_ip: ', ats_ip
+    print 'pps_ip: ', pps_ip
+    print 'pps_port: ', pps_port
+    print 'domain_sfx_err_count: ', domain_sfx_err_count
+    print 'domain_sfx_err_rate: ', domain_sfx_err_rate
+    return cp
+
+once_flag = 0
 txn_idx = 0
+d1 = {}
+mutex = Lock()
+version_message = '1.0.1'
+#1.0.1: Add conf obj; Add log obj
+#1.0.2: More pps. add tool config
+
 if __name__ == '__main__':
-    d1 = {}
+    help_message = 'Usage: python %s' % sys.argv[0]
+    if len(sys.argv) == 2 and (sys.argv[1] in '--version'):
+	print version_message
+	exit(1)
+    if len(sys.argv) == 2 and (sys.argv[1] in '--help'):
+	print help_message
+	exit(1)
+    if len(sys.argv) != 1:
+	print help_message
+	exit(1)
+
+    cp = config_parse()
+    get_domain_white(cp.get('common', 'domain_white_list'))
+    loger = CLog(log_file, log_fmt, 12, 5, cp.get('common', 'debug'))
+    print 'Start ok'
+
+    daemonize()
+
     tmg = taskManage()
     tmg.run()
+    pull_pps_job = Job(txn_idx, period_check_task, time.time(), int(cp.get('common', 'interval')), '', '', callback_routine, '', '')
+    tmg.task_add(pull_pps_job)
     def callback(filename, lines):
         for line in lines:
             fields = line.strip().split("'")
             http_code = fields[23]
             domain = fields[13]
+	    log_message = 'new line ' + domain
+    	    #loger.write(10, log_message)
             if len(domain.split(":")) > 0:
                 domain = domain.split(":")[0]
-            user_ip = fields[5]
-            result = urlparse(fields[15])
-            sfx = get_suffix(result.path)
-            #print fields[15], sfx
+	    user_ip = fields[5]
+	    result = urlparse(fields[15])
+	    sfx = get_suffix(result.path)
+	    if sfx == 'nil' or sfx == 'null':
+		continue
 
             if len(domain) <= 3:
-                continue
-            #is watch req
-            if user_ip == settings['local_ip']:
-                continue
-            
-            sfx_dict = None
-            if not d1.has_key(domain):
-                d1[domain] = {}
-                sfx_dict = d1[domain]
-            else:
-                sfx_dict = d1[domain]
+            	continue
+	    #is watch req
+	    global ats_ip
+	    if user_ip == ats_ip:
+		continue
+	    
+	    mutex.acquire()
+	    sfx_dict = None
+	    if not d1.has_key(domain):
+		d1[domain] = {}
+		sfx_dict = d1[domain]
+	    else:
+		sfx_dict = d1[domain]
 
-            if not sfx_dict.has_key(sfx):
-                sfx_dict[sfx] = {'20x':0, 'not_ok':0}
+	    if not sfx_dict.has_key(sfx):
+		sfx_dict[sfx] = {'20x':0, 'not_ok':0}
 
-            if not(http_code in "200" or http_code in "206" or http_code in "304"): 
-                sfx_dict[sfx]['not_ok'] += 1
-            else:
-                sfx_dict[sfx]['20x'] += 1
-
-            global cur_time
-            global txn_idx
-            if float(time.time()) - cur_time >= settings['interval']:
-                cur_time = float(time.time())
-                print "------>"
-                for k in d1.keys():
-                        #print k, d1[k]
-                    for k1 in d1[k].keys():
-                        err_rate = d1[k][k1]['not_ok'] * 100 / (d1[k][k1]['not_ok'] + d1[k][k1]['20x'])
-                        #print k1, err_rate
-                        if err_rate >= settings['domain_sfx_err_rate'] and (d1[k][k1]['not_ok'] + d1[k][k1]['20x']) >= settings['domain_sfx_err_count'] :
-                            print "will add to task", k, k1, err_rate
-                            txn_idx += 1
-                            job = Job(txn_idx, pull_data, time.time(), 0, k, '', callback_routine, k1, '')
-                            tmg.task_add(job)
-                print "<------"
-                d1.clear()
+            if not(http_code in "200" or http_code in "206" or http_code in "304" or http_code in "204"): 
+		sfx_dict[sfx]['not_ok'] += 1
+	    else:
+		sfx_dict[sfx]['20x'] += 1
+	    mutex.release()
 
     l = LogWatcher("/opt/ats/var/log/trafficserver", callback)
     l.loop()
+
 
 #https://docs.python.org/2/library/ctypes.html
 #https://blog.csdn.net/u012611644/article/details/80529746
