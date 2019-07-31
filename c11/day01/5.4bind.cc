@@ -36,3 +36,15 @@ int main(void)
   return 0;
 }
 //bind可将 可调用对象与参数绑定 (绑定后仍是可调用对象，只是有参数而已) 再用函数包装器保存 调用的时候直接调用函数包装器即可
+
+
+
+class Foo
+{
+void doit();
+};
+shared_ptr<Foo> pFoo(new Foo);
+boost::function<void()> func = boost::bind(&Foo::doit, pFoo); // long life foo
+
+//这里func对象持有了shared_ptr<Foo>的一份拷贝 对象的生命期就不会短于boost::function对象  有可能会在不经意间延长倒数第二行创建的Foo对象的生命期 
+
