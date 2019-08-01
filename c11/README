@@ -7,7 +7,7 @@ https://en.cppreference.com/w/cpp/language
 如果这些都回答得不错，进一步还可以问问如何实现线程安全的引用计数，如何定制删除动作等等。这些问题让我能迅速辨别对方的 C++ 水平。
 
 
-
+首先可以使用绝对无害的库，例如 noncopyable、scoped_ptr、static_assert
 
 
 
