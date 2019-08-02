@@ -1,3 +1,5 @@
+暖场必备: Effectivec++ 必须熟读
+
 https://en.cppreference.com/w/cpp/language
 惯用的暖场问题是“工作中使用过 STL 的哪些组件？使用过 Boost 的哪些组件？”。
 得到的答案大多集中在 vector、map、shared_ptr。
