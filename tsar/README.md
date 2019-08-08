@@ -130,3 +130,5 @@ More
 Homepage http://tsar.taobao.org
 
 Any question, please feel free to contact me by kongjian@taobao.com
+
+fix tsar.spec.in && del some message
