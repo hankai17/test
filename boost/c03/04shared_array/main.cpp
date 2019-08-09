@@ -25,11 +25,12 @@ void do_process_shared_array(const boost::shared_array<char>& data, std::size_t 
 void do_process_in_background_v1(const char* data, std::size_t size) {
     // We need to copy data, because we do not know, when it will be
     // deallocated by the caller
-    boost::shared_array<char> data_cpy(new char[size]);
+    //boost::shared_array<char> data_cpy(new char[size]);
+    boost::shared_ptr<char[]> data_cpy = boost::make_shared<char[]>(size); //快的原因是 生成内存时，有很少的调用 注意boost版本>1.53
     std::memcpy(data_cpy.get(), data, size);
 
     // Starting thread of execution to process data
-    boost::thread(boost::bind(&do_process_shared_array, data_cpy, size))
+    boost::thread(boost::bind(&do_process_shared_array, data_cpy, size)) //shared_ptr典型应用 thread+shared拷贝构造
             .detach();
 
     // no need to call delete[] for data_cpy, because
@@ -37,42 +38,10 @@ void do_process_in_background_v1(const char* data, std::size_t size) {
     // reference count will be zero
 }
 
-
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-
-void do_process_shared_ptr(
-        const boost::shared_ptr<char[]>& data,
-        std::size_t size)
-{
-    do_process(data.get(), size);
-}
-//快的原因是 生成内存时，有很少的调用
-void do_process_in_background_v2(const char* data, std::size_t size) {
-    // Faster than 'First solution'
-    boost::shared_ptr<char[]> data_cpy = boost::make_shared<char[]>(size);
-    std::memcpy(data_cpy.get(), data, size);
-
-    // Starting thread of execution to process data
-    boost::thread(boost::bind(&do_process_shared_ptr, data_cpy, size))
-            .detach();
-
-    // data_cpy destructor will deallocate data when
-    // reference count will be zero
-}
-
-void do_process_shared_ptr2(
-        const boost::shared_ptr<char>& data,
-        std::size_t size)
-{
-    do_process(data.get(), size);
-}
-
 void do_process_in_background_v3(const char* data, std::size_t size) {
-    // Same speed as in First solution
     boost::shared_ptr<char> data_cpy(
                 new char[size],
-                boost::checked_array_deleter<char>()
+                boost::checked_array_deleter<char>() //虽然慢 但是可以自定义析构
     );
     std::memcpy(data_cpy.get(), data, size);
 
