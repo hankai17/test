@@ -33,7 +33,7 @@ void foo1() {
         std::cout<<p->data<<std::endl;
         // There will be too many threads soon, see
         // recipe 'Parallel execution of different tasks'
-        // for a good way to avoid uncontrolled growth of threads
+        // for a good way to avoid uncontrolled growth of threads 立即起了3个线程 但不知道什么时机释放
 
         boost::thread(boost::bind(&process1, p))
                 .detach();
@@ -44,6 +44,8 @@ void foo1() {
         // delete p; Oops!!!!
     }
 }
+/*如果用到配置文件更新 感觉用shared_ptr就麻烦了 如果用就这样用: 每来一个事务就拷贝构造一个shared_ptr<conf> 让全局conf引用++
+当更新时 rest全局conf 从而实现替换   但如果事务很多会不会造成拷贝构造 变成瓶颈*/
 
 
 #include <boost/shared_ptr.hpp>
@@ -58,7 +60,7 @@ void foo2() { //shared_ptr has reference counter
     while (p = ptr_t(get_data())) // C way 
     {
         std::cout<<p->data<<std::endl;
-        boost::thread(boost::bind(&process_sp1, p))
+        boost::thread(boost::bind(&process_sp1, p)) //一切皆对象 函数对象中拷贝构造了shared_ptr对象 使shared_ptr对象引用计数++ 直到函数对象析构 shared_ptr对象才析构--
                 .detach();
         boost::thread(boost::bind(&process_sp2, p))
                 .detach();
@@ -67,6 +69,11 @@ void foo2() { //shared_ptr has reference counter
         // no need to anything
     }
 }
+/*
+std::shared_ptr<Person> p1(new Person(1)); //p1的引用计数为1
+std::shared_ptr<Person> p2 = std::make_shared<Person>(2); //p2的引用计数为1
+注意两种构造区别  第一种调两次new 相当于脱裤子放屁 第二种简练
+*/
 
 #include <string>
 #include <boost/smart_ptr/make_shared.hpp>
