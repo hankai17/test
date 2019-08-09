@@ -1,3 +1,7 @@
+/*
+scoped_ptr 用在一个{}内 或 引用传递给一个函数
+shared_ptr 用在thread bind   其根本是 thread + shared_ptr发生拷贝构造
+*/
 
 void may_throw1(const char* buffer);
 void may_throw2(const char* buffer);
