@@ -54,7 +54,7 @@ bool foo2() { //加上try 但看起来很冗余 , 可读性不高
 bool foo3() { //一旦有异常，就自动清理内存 
     boost::scoped_ptr<foo_class> p(new foo_class("Some initialization data"));
 
-    bool something_else_happened = some_function1(p.get());
+    bool something_else_happened = some_function1(p.get()); //参数最好改成scoped_ptr的引用
     if (something_else_happened) {
        return false;
     }
