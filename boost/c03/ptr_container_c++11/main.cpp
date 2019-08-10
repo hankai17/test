@@ -5,9 +5,9 @@
 #include <cassert>
 
 template <class T>
-struct ptr_cmp: public std::binary_function<T, T, bool> {
+struct ptr_cmp: public std::binary_function<T, T, bool> { //仿函数即也叫函数对象
     template <class T1>
-    bool operator()(const T1& v1, const T1& v2) const {
+    bool operator()(const T1& v1, const T1& v2) const { //模板模板 怎么调 好高级
         return operator ()(*v1, *v2);
     }
 
@@ -36,7 +36,10 @@ void example1() {
     // Deallocating resources
     // Any exception in this code will lead to
     // memory leak
-    std::for_each(s.begin(), s.end(), ptr_deleter<int>());
+    //std::for_each(s.begin(), s.end(), ptr_deleter<int>()); //跟下面一个意思  都是遍历删除  有可能内存泄漏
+    std::for_each(s.begin(), s.end(), 
+                  boost::bing(::operator delete, _1)
+                 );
 }
 
 //void example2_a() {
@@ -51,17 +54,17 @@ void example1() {
 //}
 
 void example2_b() {
-    typedef std::unique_ptr<int> int_uptr_t;
+    typedef std::unique_ptr<int> int_uptr_t; //看到typedef了吧 下面就很可能用到vec之类的容器
     std::set<int_uptr_t, ptr_cmp<int> > s;
     s.insert(int_uptr_t(new int(1)));
     s.insert(int_uptr_t(new int(0)));
     // ...
-    assert(**s.begin() == 0);
+    assert(**s.begin() == 0); //看不懂
     // ...
     // resources will be deallocated by unique_ptr<>
 }
 
-#include <boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp> //移植性更好 适用于多种编译器  
 void example3() {
     typedef boost::shared_ptr<int> int_sptr_t;
     std::set<int_sptr_t, ptr_cmp<int> > s;
@@ -75,7 +78,7 @@ void example3() {
 
 #include <boost/ptr_container/ptr_set.hpp>
 void correct_impl() {
-    boost::ptr_set<int> s;
+    boost::ptr_set<int> s; //省的搞仿函数了  
     s.insert(new int(1));
     s.insert(new int(0));
     // ...
