@@ -92,7 +92,7 @@ void correct_impl() {
 void theres_more_example() {
     // Creating vector of 10 elements with values 100
     boost::ptr_vector<int> v;
-    v.resize(10, new int(100));
+    v.resize(10, new int(100)); //调默认的
     assert(v.size() == 10);
     assert(v.back() == 100);
 }
@@ -105,3 +105,6 @@ int main() {
     correct_impl();
     theres_more_example();
 }
+/*类似的还有很多ptr容器  ptr_vec ptr_array ptr_set ptr_multimap
+都是容器里盛放 通用的ptr   即使发生了异常也会把所有ptr都释放掉 不会发生内存泄漏·
+*/
