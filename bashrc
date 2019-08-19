@@ -125,5 +125,7 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #tcpdump -i any -nnnAs 0 tcp or udp -w 1.pcap
 #tcpdump -Xnns 0 -i any port 5005 赛赛看包很溜
 #tcpdump port 80 -i lo -Xnns 0 -r 1.cap
+#ll /home*/ppcache_dat/07/A0/07E3D78F8ED1E32E2A318DBA8F909A69B79805A0* 
+# hexdump -C /home6/ppcache_dat/07/A0/07E3D78F8ED1E32E2A318DBA8F909A69B79805A0.info  
 
 
