@@ -12,10 +12,10 @@ void func() {
 
 void create_thread() {
 	std::thread t(func);
-	g_list.push_back(std::move(t)); //push_back时 会发生拷贝和析构动作 如果直接push t则发生析构和拷贝构造 这样显然是不行的
-                                    //so 把这个左值变成右值直接push进去 c11的thread里面肯定有move语义 不会发生构造和析构
+	g_list.push_back(std::move(t)); //如果直接push一个左值线程对象 就会调拷贝构造 会多出一个线程 这不是我们想要的
+					//把这个左值变成右值直接push进去 c11的thread里面肯定有move语义 
 									//thread拷贝构造函数(被禁用)
-	g_list2.push_back(std::make_shared<std::thread>(func));
+	g_list2.push_back(std::make_shared<std::thread>(func)); //vector的push只会发生拷贝构造
 }
 
 int main()
