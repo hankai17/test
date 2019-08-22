@@ -1,0 +1,1 @@
+#tail -n20 detectdown.log_80 | grep "CONNECT_ERROR_2" | awk '{print "http://"$5}' | xargs -n1 -I {} curl -v -o /dev/null {}
