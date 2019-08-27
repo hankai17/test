@@ -11,7 +11,8 @@ filename = sys.argv[1]
 
 fd = open(filename, 'r')
 
-logs = {}
+#logs = {}
+logs = {'nil': 0, 'null': 0, 'php' : 0, 'jpg' : 0, 'webp' : 0, 'mp4' : 0, 'js' : 0, 'jpeg' : 0, 'unio' : 0, 'html' : 0, 'gif' : 0, 'imag' : 0, 'png' : 0, 'css' : 0, 'm3u8' : 0, 'json' : 0, 'apk' : 0, 'dat' : 0, 'ini' : 0, 'mp3' : 0, 'ico' : 0 , 'gif' : 0}
 
 def process_domain(domain):
     fields = domain.split(".")
@@ -27,7 +28,7 @@ def get_suffix(p):
     if len(fields) == 0 or len(fields) == 1:
         #return "no sfx"
         return "null"
-    return fields[len(fields) - 1]
+    return fields[1]
 
 for line in fd.readlines():
     fields = line.strip().split("'")
@@ -45,38 +46,19 @@ for line in fd.readlines():
 
     sfx = get_suffix(result.path)
     #print sfx 
- 
-    try:
-        cl = int(fields[29])
-    except BaseException:
-        continue
 
-    ddomain = process_domain(domain)
+    #ddomain = process_domain(domain)
     #print ddomain
     ddomain = domain
     if len(ddomain) < 5:
         continue
 
-    if not logs.has_key(ddomain):
-        logs[ddomain] = {'hit':0, 'miss':0, 'other':0, 'sum_flow':0, 'sfx_list':[]}
+    if not logs.has_key(sfx):
+        continue
+    cl = fields[29]
+    if int(cl) <= 0:
+        continue
+    logs[sfx] += int(cl)
 
-
-    if 'HIT' in hit_miss:
-        logs[ddomain]['hit'] += 1
-    elif 'MISS' in hit_miss:
-        logs[ddomain]['miss'] += 1
-    else:
-        logs[ddomain]['other'] += 1
-
-    logs[ddomain]['sum_flow'] += cl
-    (logs[ddomain]['sfx_list']).append(sfx)
-    logs[ddomain]['sfx_list'] = list(set(logs[ddomain]['sfx_list']))
-
-print "%-50s%-10s%-10s%-10s%-10s" %("domain", "miss", "hit", "hit/sum", "sum_flow")
-for k in logs.keys():
-    if logs[k]['hit'] + logs[k]['miss'] != 0:
-        sfx_str = ''
-        for i in logs[k]['sfx_list']:
-            sfx_str += (i + ' ')
-        print "%-50.45s%-10d%-10d%-10d%-10d  %s" %(k, logs[k]['miss'], logs[k]['hit'], (logs[k]['hit'] * 100/(logs[k]['hit'] + logs[k]['miss'])), logs[k]['sum_flow'], sfx_str)
-fd.close()
+for k in logs:
+    print "%-20s%-20d" %(k, logs[k]/1024/1024)
