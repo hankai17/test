@@ -31,5 +31,5 @@ int main(void) {
 
 //当TestForward 接左值时 T会被转化为int& 根据折叠规则 这个参数类型实际上会变成int&
 //当TestForward 接右值时 T会被转化成int 因此这个参数类型实际上会变成int&&
-//std::forward<T>(u)有两个参数 当T为左值引用时 u将被转换为T类型的左值 否则u将被转换为T类型右值
+//std::forward<T>(u)有两个参数 当T为左值引用时 u将被转换为T类型的左值 否则u将被转换为T类型右值   而move是无条件转发成右值 forward是有条件的
 //https://blog.csdn.net/rankun1/article/details/78354153
