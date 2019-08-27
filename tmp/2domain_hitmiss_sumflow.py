@@ -58,7 +58,7 @@ for line in fd.readlines():
         continue
 
     if not logs.has_key(ddomain):
-        logs[ddomain] = {'hit':0, 'miss':0, 'other':0, 'sum_flow':0}
+        logs[ddomain] = {'hit':0, 'miss':0, 'other':0, 'sum_flow':0, 'sfx_list':[]}
 
 
     if 'HIT' in hit_miss:
@@ -69,9 +69,14 @@ for line in fd.readlines():
         logs[ddomain]['other'] += 1
 
     logs[ddomain]['sum_flow'] += cl
+    (logs[ddomain]['sfx_list']).append(sfx)
+    logs[ddomain]['sfx_list'] = list(set(logs[ddomain]['sfx_list']))
 
-print "%-30s%-10s%-10s%-10s%-10s" %("domain", "miss", "hit", "hit/sum", "sum_flow")
+print "%-50s%-10s%-10s%-10s%-10s" %("domain", "miss", "hit", "hit/sum", "sum_flow")
 for k in logs.keys():
     if logs[k]['hit'] + logs[k]['miss'] != 0:
-        print "%-30.25s%-10d%-10d%-10d%-10d" %(k, logs[k]['miss'], logs[k]['hit'], (logs[k]['hit'] * 100/(logs[k]['hit'] + logs[k]['miss'])), logs[k]['sum_flow'])
+        sfx_str = ''
+        for i in logs[k]['sfx_list']:
+            sfx_str += (i + ' ')
+        print "%-50.45s%-10d%-10d%-10d%-10d  %s" %(k, logs[k]['miss'], logs[k]['hit'], (logs[k]['hit'] * 100/(logs[k]['hit'] + logs[k]['miss'])), logs[k]['sum_flow'], sfx_str)
 fd.close()
