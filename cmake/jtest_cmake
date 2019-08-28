@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.13)
+project(jtest)
+
+set(CMAKE_CXX_STANDARD 14)
+include_directories("/root/file/traffic_server/lib" "/root/file/http_ppc")
+LINK_DIRECTORIES("/opt/ats/lib" "/root/file/http_ppc")
+LINK_LIBRARIES(tsutil)
+
+add_executable(jtest
+        jtest.cc)
+target_link_libraries(jtest /root/file/http_ppc/ppc_hash/liburl_to_sha.a)
+
