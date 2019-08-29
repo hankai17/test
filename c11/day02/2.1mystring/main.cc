@@ -18,7 +18,7 @@ void test01(){
 
 	
 
-	//²âÊÔ¸³Öµ
+	//æµ‹è¯•èµ‹å€¼
 	mystring str4;
 	str4 = str3;
 	cout << "str4:" << str4 << endl;
@@ -33,22 +33,38 @@ void test02(){
 	mystring str1 = "abcd";
 	mystring str2 = "abcd";
 	if (str1 == str2){
-		cout << "str1 ºÍ str2 ÏàÍ¬µÄ×Ö·û´®!" << endl;
+		cout << "str1 å’Œ str2 ç›¸åŒçš„å­—ç¬¦ä¸²!" << endl;
 	}
 
 	if (str1 == "abcd"){
-		cout << "str1 ºÍ abcd ÏàÍ¬µÄ×Ö·û´®!" << endl;
+		cout << "str1 å’Œ abcd ç›¸åŒçš„å­—ç¬¦ä¸²!" << endl;
 	}
 
 	if (str1 != str2){
-		cout << "str1 ºÍ str2 ²»ÏàÍ¬µÄ×Ö·û´®!" << endl;
+		cout << "str1 å’Œ str2 ä¸ç›¸åŒçš„å­—ç¬¦ä¸²!" << endl;
 	}
 
 	if (str1 != "abcd"){
-		cout << "str1 ºÍ abcd ²»ÏàÍ¬µÄ×Ö·û´®!" << endl;
+		cout << "str1 å’Œ abcd ä¸ç›¸åŒçš„å­—ç¬¦ä¸²!" << endl;
 	}
 
 }
+
+void test03() {
+        mystring str1;
+        str1 = "adcd"; //char* å‚æ•°æ„é€                 //ä¸ºä»€ä¹ˆä¸è°ƒchar*æ‹·è´???
+}
+
+void test04() {
+        mystring str1;
+        str1 = mystring("adcd");  //èµ‹å€¼æ‹·è´
+}
+
+void test05() {
+        mystring str1 = mystring("adcd"); //char*å‚æ•°æ„é€   æ‹·è´æ„é€ 
+}
+
+
 
 int main(){
 
