@@ -331,98 +331,81 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen, struct hostent **hos
   *host = NULL;
 
   /* Give up if abuf doesn't have room for a header. */
-  if (alen < HFIXEDSZ)
-    return ARES_EBADRESP;
+  if(alen < HFIXEDSZ) return ARES_EBADRESP;
 
   /* Fetch the question and answer count from the header. */
   qdcount = DNS_HEADER_QDCOUNT(abuf);
   ancount = DNS_HEADER_ANCOUNT(abuf);
-  if (qdcount != 1)
-    return ARES_EBADRESP;
+  if(qdcount != 1) return ARES_EBADRESP;
 
   /* Expand the name from the question, and skip past the question. */
-  aptr = abuf + HFIXEDSZ;
+  aptr = abuf + HFIXEDSZ; //In query
   status = ares_expand_name(aptr, abuf, alen, &hostname, &len);
-  if (status != ARES_SUCCESS)
-    return status;
-  if (aptr + len + QFIXEDSZ > abuf + alen)
-    {
-      free(hostname);
-      return ARES_EBADRESP;
-    }
-  aptr += len + QFIXEDSZ;
+  if(status != ARES_SUCCESS) return status;
+  if(aptr + len + QFIXEDSZ > abuf + alen) {
+    free(hostname);
+    return ARES_EBADRESP;
+  }
+  aptr += len + QFIXEDSZ; //In ans
 
   /* Allocate addresses and aliases; ancount gives an upper bound for both. */
   addrs = malloc(ancount * sizeof(struct in_addr));
-  if (!addrs)
-    {
-      free(hostname);
-      return ARES_ENOMEM;
-    }
+  if (!addrs) {
+    free(hostname);
+    return ARES_ENOMEM;
+  }
   aliases = malloc((ancount + 1) * sizeof(char *));
-  if (!aliases)
-    {
-      free(hostname);
-      free(addrs);
-      return ARES_ENOMEM;
-    }
+  if(!aliases) {
+    free(hostname);
+    free(addrs);
+    return ARES_ENOMEM;
+  }
   naddrs = 0;
   naliases = 0;
 
   /* Examine each answer resource record (RR) in turn. */
-  for (i = 0; i < (int)ancount; i++)
+  for(i = 0; i < (int)ancount; i++)
     {
       /* Decode the RR up to the data field. */
       status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
-      if (status != ARES_SUCCESS)
-	break;
+      if(status != ARES_SUCCESS) break;
       aptr += len;
-      if (aptr + RRFIXEDSZ > abuf + alen)
-	{
-	  status = ARES_EBADRESP;
-	  break;
-	}
+      if(aptr + RRFIXEDSZ > abuf + alen) {
+	status = ARES_EBADRESP;
+	break;
+      }
       rr_type = DNS_RR_TYPE(aptr);
       rr_class = DNS_RR_CLASS(aptr);
       rr_len = DNS_RR_LEN(aptr);
       aptr += RRFIXEDSZ;
 
-      if (rr_class == C_IN && rr_type == T_A
-	  && rr_len == sizeof(struct in_addr)
-	  && strcasecmp(rr_name, hostname) == 0)
-	{
-	  memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
-	  naddrs++;
-	  status = ARES_SUCCESS;
-	}
+      if(rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr) && strcasecmp(rr_name, hostname) == 0) {
+	memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
+	naddrs++;
+	status = ARES_SUCCESS;
+      } //正是查询域名的a记录 则拷到a记录数组中
 
-      if (rr_class == C_IN && rr_type == T_CNAME)
-	{
-	  /* Record the RR name as an alias. */
-	  aliases[naliases] = rr_name;
-	  naliases++;
-
-	  /* Decode the RR data and replace the hostname with it. */
-	  status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
-	  if (status != ARES_SUCCESS)
-	    break;
-	  free(hostname);
-	  hostname = rr_data;
-	}
-      else
+      if(rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
+	/* Record the RR name as an alias. */
+	aliases[naliases] = rr_name;
+	naliases++
+	/* Decode the RR data and replace the hostname with it. */
+	status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
+	if(status != ARES_SUCCESS) break;
+	free(hostname);
+	hostname = rr_data;
+      } else
 	free(rr_name);
 
       aptr += rr_len;
-      if (aptr > abuf + alen)
-	{
-	  status = ARES_EBADRESP;
-	  break;
-	}
+      if(aptr > abuf + alen) {
+        status = ARES_EBADRESP;
+        break;
+      }
     }
 
-  if (status == ARES_SUCCESS && naddrs == 0)
-    status = ARES_ENODATA;
-  if (status == ARES_SUCCESS)
+  if(status == ARES_SUCCESS && naddrs == 0) status = ARES_ENODATA;
+  if(status == ARES_SUCCESS) //只要有a记录 就当做是成功
     {
       /* We got our answer.  Allocate memory to build the host entry. */
       aliases[naliases] = NULL;
