@@ -364,73 +364,69 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen, struct hostent **hos
   naliases = 0;
 
   /* Examine each answer resource record (RR) in turn. */
-  for(i = 0; i < (int)ancount; i++)
-    {
-      /* Decode the RR up to the data field. */
-      status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
-      if(status != ARES_SUCCESS) break;
-      aptr += len;
-      if(aptr + RRFIXEDSZ > abuf + alen) {
-	status = ARES_EBADRESP;
-	break;
-      }
-      rr_type = DNS_RR_TYPE(aptr);
-      rr_class = DNS_RR_CLASS(aptr);
-      rr_len = DNS_RR_LEN(aptr);
-      aptr += RRFIXEDSZ;
-
-      if(rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr) && strcasecmp(rr_name, hostname) == 0) {
-	memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
-	naddrs++;
-	status = ARES_SUCCESS;
-      } //正是查询域名的a记录 则拷到a记录数组中
-
-      if(rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
-	/* Record the RR name as an alias. */
-	aliases[naliases] = rr_name;
-	naliases++
-	/* Decode the RR data and replace the hostname with it. */
-	status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
-	if(status != ARES_SUCCESS) break;
-	free(hostname);
-	hostname = rr_data;
-      } else
-	free(rr_name);
-
-      aptr += rr_len;
-      if(aptr > abuf + alen) {
-        status = ARES_EBADRESP;
-        break;
-      }
+  for(i = 0; i < (int)ancount; i++) {
+    /* Decode the RR up to the data field. */
+    status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
+    if(status != ARES_SUCCESS) break;
+    aptr += len;
+    if(aptr + RRFIXEDSZ > abuf + alen) {
+      status = ARES_EBADRESP;
+      break;
     }
+    rr_type = DNS_RR_TYPE(aptr);
+    rr_class = DNS_RR_CLASS(aptr);
+    rr_len = DNS_RR_LEN(aptr);
+    aptr += RRFIXEDSZ;
+
+    if(rr_class == C_IN && rr_type == T_A && rr_len == sizeof(struct in_addr) && strcasecmp(rr_name, hostname) == 0) {
+      memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
+      naddrs++;
+      status = ARES_SUCCESS;
+    } //正是查询域名的a记录 则拷到a记录数组中
+
+    if(rr_class == C_IN && rr_type == T_CNAME) { //cname 则把具体的域名 放到alias数组中
+      /* Record the RR name as an alias. */
+      aliases[naliases] = rr_name;
+      naliases++
+      /* Decode the RR data and replace the hostname with it. */
+      status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
+      if(status != ARES_SUCCESS) break;
+      free(hostname);
+      hostname = rr_data;
+    } else
+      free(rr_name);
+
+    aptr += rr_len;
+    if(aptr > abuf + alen) {
+      status = ARES_EBADRESP;
+      break;
+    }
+  }
 
   if(status == ARES_SUCCESS && naddrs == 0) status = ARES_ENODATA;
-  if(status == ARES_SUCCESS) //只要有a记录 就当做是成功
-    {
-      /* We got our answer.  Allocate memory to build the host entry. */
-      aliases[naliases] = NULL;
-      hostent = malloc(sizeof(struct hostent));
-      if (hostent)
-	{
-	  hostent->h_addr_list = malloc((naddrs + 1) * sizeof(char *));
-	  if (hostent->h_addr_list)
-	    {
-	      /* Fill in the hostent and return successfully. */
-	      hostent->h_name = hostname;
-	      hostent->h_aliases = aliases;
-	      hostent->h_addrtype = AF_INET;
-	      hostent->h_length = sizeof(struct in_addr);
-	      for (i = 0; i < naddrs; i++)
-		hostent->h_addr_list[i] = (char *) &addrs[i];
-	      hostent->h_addr_list[naddrs] = NULL;
-	      *host = hostent;
-	      return ARES_SUCCESS;
-	    }
-	  free(hostent);
-	}
-      status = ARES_ENOMEM;
+  if(status == ARES_SUCCESS) { //只要有a记录 就当做是成功
+    /* We got our answer.  Allocate memory to build the host entry. */
+    aliases[naliases] = NULL;
+    hostent = malloc(sizeof(struct hostent));
+    if(hostent) {
+      hostent->h_addr_list = malloc((naddrs + 1) * sizeof(char *));
+      if(hostent->h_addr_list) {
+        /* Fill in the hostent and return successfully. */
+        hostent->h_name = hostname;
+        hostent->h_aliases = aliases;
+        hostent->h_addrtype = AF_INET;
+        hostent->h_length = sizeof(struct in_addr);
+        for (i = 0; i < naddrs; i++)
+      	  hostent->h_addr_list[i] = (char *) &addrs[i];
+        hostent->h_addr_list[naddrs] = NULL;
+        *host = hostent;
+        return ARES_SUCCESS;
+      }
+      free(hostent);
     }
-  for (i = 0; i < naliases; i++)
+    status = ARES_ENOMEM;
+  }
+  for(i = 0; i < naliases; i++)
     free(aliases[i]);
   free(aliases);
   free(addrs);
