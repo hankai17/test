@@ -1,7 +1,0 @@
-configure
-autom4te.cache
-Makefile
-adig
-ahost
-config.log
-config.status
