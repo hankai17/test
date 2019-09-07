@@ -259,7 +259,7 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id, in
    * thus n + 1 length fields, unless the name is empty or ends with a
    * period.  So add 1 unless name is empty or ends with a period.
    */
-  if(*name && *(p - 1) != '.')
+  if(*name && *(p - 1) != '.')  //顶级域必须有点结尾
     len++;
 
   *buflen = len + HFIXEDSZ + QFIXEDSZ;
