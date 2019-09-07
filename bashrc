@@ -73,6 +73,7 @@ alias ats_jtest='cd /root/file/ts/trafficserver-7.1.1/tools/jtest;pwd'
 alias ats_clear_cache='traffic_server -Cclear;'
 alias go_src='cd /usr/lib/golang/src;pwd'
 alias gortp='cd /root/go_pro/src/github.com/wernerd/GoRTP/src/net;pwd'
+alias local_ip='curl http://icanhazip.com'
 
 export GOROOT=/usr/local/go
 export GOPATH=/root/go_pro
