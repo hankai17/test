@@ -92,17 +92,14 @@ void ares_destroy(ares_channel channel) {
   free(channel);
 }
 
-/* Return the length of the expansion of an encoded domain name, or
- * -1 if the encoding is invalid.
- */
-static int name_length(const unsigned char *encoded, const unsigned char *abuf, int alen) {
+static int name_length(const unsigned char *encoded, const unsigned char *abuf, int alen) { //返回压缩前 域名长度 包括点
   int n = 0, offset, indir = 0;
 
   /* Allow the caller to pass us abuf + alen and have us check for it. */
   if(encoded == abuf + alen) return -1;
 
   while(*encoded) {
-    if((*encoded & INDIR_MASK) == INDIR_MASK) {
+    if((*encoded & INDIR_MASK) == INDIR_MASK) { //0xc0
       /* Check the offset and go there. */
       if(encoded + 1 >= abuf + alen) return -1;
       offset = (*encoded & ~INDIR_MASK) << 8 | *(encoded + 1);
@@ -160,7 +157,7 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf, in
   char *q;
   const unsigned char *p;
 
-  len = name_length(encoded, abuf, alen);
+  len = name_length(encoded, abuf, alen); //仅是assert作用 感觉很多余?
   if(len == -1) return ARES_EBADNAME;
 
   *s = malloc(len + 1);
@@ -169,7 +166,7 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf, in
 
   /* No error-checking necessary; it was all done by name_length(). */
   p = encoded;
-  while(*p) {
+  while(*p) { //拷贝
     if((*p & INDIR_MASK) == INDIR_MASK) {
       if(!indir) {
         *enclen = p + 2 - encoded;
@@ -317,6 +314,7 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id, in
 
   return ARES_SUCCESS;
 }
+
 int ares_parse_a_reply(const unsigned char *abuf, int alen, struct hostent **host) {
   unsigned int qdcount, ancount;
   int status, i, rr_type, rr_class, rr_len, naddrs;
