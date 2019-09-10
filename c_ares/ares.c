@@ -673,42 +673,38 @@ const char *ares_strerror(int code) {
   return errtext[code];
 }
 
-struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
-			     struct timeval *tvbuf)
-{
+struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv, struct timeval *tvbuf/*out*/) { //这个函数不是做超时回调  而是为了确定上层select阻塞多久
   struct query *query;
   time_t now;
   int offset, min_offset;
 
-  /* No queries, no timeout (and no fetch of the current time). */
-  if (!channel->queries)
+  //No queries, no timeout (and no fetch of the current time)
+  if(!channel->queries)
     return maxtv;
 
-  /* Find the minimum timeout for the current set of queries. */
+  //Find the minimum timeout for the current set of queries
   time(&now);
   min_offset = -1;
-  for (query = channel->queries; query; query = query->next)
-    {
-      if (query->timeout == 0)
-	continue;
-      offset = query->timeout - now;
-      if (offset < 0)
-	offset = 0;
-      if (min_offset == -1 || offset < min_offset)
-	min_offset = offset;
-    }
+  for(query = channel->queries; query; query = query->next) {
+    if(query->timeout == 0)
+      continue;
+    offset = query->timeout - now;
+    if(offset < 0)
+      offset = 0;
+    if(min_offset == -1 || offset < min_offset)
+      min_offset = offset;
+  } //如果此时min_offset大于0 即说明没有超时的query 否则说明有超时的query
 
   /* If we found a minimum timeout and it's sooner than the one
    * specified in maxtv (if any), return it.  Otherwise go with
    * maxtv.
    */
-  if (min_offset != -1 && (!maxtv || min_offset <= maxtv->tv_sec))
-    {
-      tvbuf->tv_sec = min_offset;
-      tvbuf->tv_usec = 0;
-      return tvbuf;
-    }
-  else
+  if(min_offset != -1 && (!maxtv || min_offset <= maxtv->tv_sec)) { //意思是 上层传入了100s 然后遍历query 99个都是5s后过期 只有一个query还有1s过期 则min_offset是1s   则返回1s 用给上层select使用
+								//一般上层传入NULL  上层select阻塞几秒由 马上要过期的那个query说的算 仍是1s
+    tvbuf->tv_sec = min_offset;
+    tvbuf->tv_usec = 0;
+    return tvbuf;
+  } else
     return maxtv;
 }
 
