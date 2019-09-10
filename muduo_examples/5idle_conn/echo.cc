@@ -76,3 +76,12 @@ void EchoServer::dumpConnectionBuckets() const {
   }
 }
 
+Bucket --> Bucket --> Bucket --> Bucket
+   |
+  entry
+   |
+  entry
+   |
+  entry
+  
+
