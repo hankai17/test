@@ -226,20 +226,16 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
     }
 }
 
-/* If any queries have timed out, note the timeout and move them on. */
-static void process_timeouts(ares_channel channel, time_t now)
-{
+//If any queries have timed out, note the timeout and move them on
+static void process_timeouts(ares_channel channel, time_t now) { //真正的超时处理
   struct query *query, *next;
-
-  for (query = channel->queries; query; query = next)
-    {
-      next = query->next;
-      if (query->timeout != 0 && now >= query->timeout)
-	{
-	  query->error_status = ARES_ETIMEOUT;
-	  next_server(channel, query, now);
-	}
+  for(query = channel->queries; query; query = next) {
+    next = query->next;
+    if(query->timeout != 0 && now >= query->timeout) {
+      query->error_status = ARES_ETIMEOUT;
+      next_server(channel, query, now);
     }
+  }
 }
 
 /* Handle an answer from a server. */
@@ -329,26 +325,22 @@ static void handle_error(ares_channel channel, int whichserver, time_t now)
     }
 }
 
-static void next_server(ares_channel channel, struct query *query, time_t now)
-{
+static void next_server(ares_channel channel, struct query *query, time_t now) {
   /* Advance to the next server or try. */
   query->server++;
-  for (; query->try < channel->tries; query->try++)
-    {
-      for (; query->server < channel->nservers; query->server++)
-	{
-	  if (!query->skip_server[query->server])
-	    {
-	      ares__send_query(channel, query, now);
-	      return;
-	    }
-	}
-      query->server = 0;
-
-      /* Only one try if we're using TCP. */
-      if (query->using_tcp)
-	break;
+  for(; query->try < channel->tries; query->try++) {
+    for(; query->server < channel->nservers; query->server++) {
+      if(!query->skip_server[query->server]) {
+        ares__send_query(channel, query, now);
+        return;
+      }
     }
+    query->server = 0;
+
+    /* Only one try if we're using TCP. */
+    if(query->using_tcp)
+      break;
+  }
   end_query(channel, query, query->error_status, NULL, 0);
 }
 
