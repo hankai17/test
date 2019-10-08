@@ -13,7 +13,7 @@ struct A {
 
 A get_A() { return A(); }
 
-A get_A_foo() { //有区别 看2.2/3
+A get_A_foo() { //有区别? 跟2.2好像没有区别啊
   A a;
   return a;
 }
