@@ -45,9 +45,9 @@ class MyString {
 	}
 };
 
-int main(void)   //-fno-elide-constructors 别忘了加!!!
+int main(void)   //
 {
-  //MyString a = MyString("Hello"); //拷贝构造函数
+  //MyString a = MyString("Hello"); //-fno-elide-constructors   先调参数构造 后调拷贝构造函数   如果加上编译器优化只调参数构造
   MyString a;
   a = MyString("Hello");  //拷贝分配
 
