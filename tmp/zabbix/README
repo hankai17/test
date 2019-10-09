@@ -1,0 +1,36 @@
+zabbix 主动模式
+
+server配置
+LogFile=/var/log/zabbix/zabbix_server.log
+LogFileSize=0
+PidFile=/var/run/zabbix/zabbix_server.pid
+SocketDir=/var/run/zabbix
+DBHost=localhost
+DBName=zabbix
+DBUser=zabbix
+DBUser=zabbix
+DBPassword=
+SNMPTrapperFile=/var/log/snmptrap/snmptrap.log
+Timeout=20
+AlertScriptsPath=/usr/lib/zabbix/alertscripts
+ExternalScripts=/usr/lib/zabbix/externalscripts
+LogSlowQueries=3000
+
+
+agent配置
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=0
+Server=10.0.120.194,127.0.0.1
+ServerActive=10.0.120.194
+Hostname=http01_10.0.120.194
+Include=/etc/zabbix/zabbix_agentd.d/*.conf
+UnsafeUserParameters=1
+AllowRoot=1
+RefreshActiveChecks=60
+Timeout=20
+
+#UserParameter=ppc_status[*],/bin/python /etc/zabbix/ppc_zabbix_collect.py $1 $2
+UserParameter=ppc_status[*],/bin/python /etc/zabbix/ppc_zabbix_collect_drop.py $1 $2
+UserParameter=io.scandisk[*],/bin/python /etc/zabbix/disk_scan.py $1
+UserParameter=mount.scandisk[*],/bin/python /etc/zabbix/mount_scan.py $1
