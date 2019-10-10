@@ -78,8 +78,9 @@ schedule
     schedule返回false 
 
     sendEvent 根据send的key值获取上下文(d_waiters) 
-    运行上下文(继续回调函数) 155行  此时状态为Answer 并 得到tid
-    返回到305行 保存tid到僵尸队列(证明回调完成 一个线程/tid的完成)
+    运行上下文155行   此时状态为Answer 并 得到tid (继续回调函数 即打印Key 1 was pressed!)
+    返回到305行 保存tid到僵尸队列(证明回调完成 一个线程/tid的完成) 即打印push into zombies
+    35行sendEvent结束 
     然后再次跳到内核  ......
 
 
