@@ -1,0 +1,36 @@
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+include_directories("/home/file/muduo-master/")
+
+add_executable(sudoku_solver_basic server_basic.cc sudoku.cc)
+target_link_libraries(sudoku_solver_basic /home/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a pthread)
+
+add_executable(sudoku_solver_multiloop server_multiloop.cc sudoku.cc)
+target_link_libraries(sudoku_solver_multiloop /home/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a pthread)
+
+add_executable(sudoku_solver_threadpool server_threadpool.cc sudoku.cc)
+target_link_libraries(sudoku_solver_threadpool /home/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a pthread)
+
+#add_executable(sudoku_solver_hybrid server_hybrid.cc sudoku.cc)
+#target_link_libraries(sudoku_solver_hybrid muduo_inspect)
+
+#add_executable(sudoku_solver_prod server_prod.cc sudoku.cc)
+#target_link_libraries(sudoku_solver_prod muduo_inspect)
+
+
+add_executable(sudoku_client_batch batch.cc sudoku.cc)
+target_link_libraries(sudoku_client_batch /home/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a pthread)
+
+add_executable(sudoku_client_pipeline pipeline.cc sudoku.cc)
+target_link_libraries(sudoku_client_pipeline /home/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a pthread)
+
+add_executable(sudoku_loadtest loadtest.cc sudoku.cc)
+target_link_libraries(sudoku_loadtest /home/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a pthread)
+
+#/root/file/build/release-install-cpp11/lib/libmuduo_net.a /home/file/build/release-install-cpp11/lib/libmuduo_base.a
+
+
+#if(BOOSTTEST_LIBRARY)
+#add_executable(sudoku_stat_unittest stat_unittest.cc)
+#target_link_libraries(sudoku_stat_unittest muduo_base boost_unit_test_framework)
+#endif()
