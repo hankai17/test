@@ -22,7 +22,7 @@ int main(void)
 
     bzero(&serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;     
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY)
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_port = htons(SERV_PORT);       
 
     bind(sfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
