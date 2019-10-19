@@ -5,3 +5,4 @@ add_executable(hello_world hello-world.c hello-world.c)
 TARGET_LINK_LIBRARIES(hello_world /root/CLionProjects/libevent2/.libs/libevent.so)
 
 #github down到cl 然后建立helloworld.c cmake  然后把项目编成动态库 在cmake中链这个库
+#./configure CFLAGS="-g -O0 -Wall -fno-strict-aliasing" 参考pdns
