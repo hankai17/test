@@ -1,0 +1,5 @@
+#include_directories("/root/file/CLionProjects/libevent2/include")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+add_executable(hello_world hello-world.c hello-world.c)
+#TARGET_LINK_LIBRARIES(hello_world event)
+TARGET_LINK_LIBRARIES(hello_world /root/CLionProjects/libevent2/.libs/libevent.so)
