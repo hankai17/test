@@ -302,3 +302,37 @@ int main()
 #endif
   return test_ratelimiting();
 }
+
+/*
+主函数调read之前会调readmax = bufferevent_get_read_max_(bufev_p); 即根据bfe的私有数据 获取当前要读多少数据
+会调bufferevent_ratelim.c中 return bufferevent_get_rlim_max_(bev, 0);
+        if (bev->rate_limiting->cfg) {
+                bufferevent_update_buckets(bev); //这里根据限速桶计算出要读写的字节数(见下)
+                max_so_far = LIM(bev->rate_limiting->limit);                                                        
+        }
+        
+        bufferevent_update_buckets(struct bufferevent_private *bev)
+        {
+          struct timeval now;
+          unsigned tick;
+          event_base_gettimeofday_cached(bev->bev.ev_base, &now);
+          tick = ev_token_bucket_get_tick_(&now, bev->rate_limiting->cfg); //当前时间的tick个数  可以想象tick(y)随时间(x)是个一次函数 y=kx
+          if (tick != bev->rate_limiting->limit.last_updated)    //(见下)
+                ev_token_bucket_update_(&bev->rate_limiting->limit,
+                    bev->rate_limiting->cfg, tick);
+}
+
+ev_token_bucket_update_(struct ev_token_bucket *bucket, cfg, current_tick)                                                                                                                                                                                          
+{                                                                                                                                                                                                                      
+        unsigned n_ticks = current_tick - bucket->last_updated; //当前时间的tick与上次read时tick差值
+        if ((cfg->read_maximum - bucket->read_limit) / n_ticks < cfg->read_rate)
+                bucket->read_limit = cfg->read_maximum;
+        else
+                bucket->read_limit += n_ticks * cfg->read_rate; //根据两个tick差值计算出本次要读、写的字节数 很明显感性上差值越大要读写的字节数就越多
+
+        bucket->last_updated = current_tick;
+        return 1;
+}
+
+
+*/
