@@ -164,8 +164,10 @@ int SyncRes::beginResolve(const DNSName &qname, const QType &qtype, uint16_t qcl
                  ret.push_back(rr);
              }
          } else {
+		 /*
              d_wasOutOfBand=true;
              goto new_start;
+	     */
          }
      } else {
          //if  ( (int)(pIcsCheck->ics_ploy_list)[groupid-1]->alive_ipv4_ics_count == 0 ) {
