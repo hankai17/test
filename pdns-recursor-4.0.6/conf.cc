@@ -160,21 +160,21 @@ int dns_conf::parse_white_conf()
         if(ch == '}')
             block_num--;
         if(block_num == 0)
-        {   //µ±һ¸������⋸ ׃±떾λ,ͬʱȥ¿ԟstrline
+        {   //µ±һ¸������⋸ ׃±떾λ,ͬʱȥ¿ԟstrline
             //²»Ŝȥ¿
             group_flag=1;
         }
 
         if(block_num == 1 && group_flag == 1) 
         {
-            //ÿһ¸������Ŀªʼ,ֻ½������´
+            //ÿһ¸������Ŀªʼ,ֻ½������´
             group1++;
             //std::cout<<"  Group"<<group1<<""<<std::endl;
             new_flag=0; 
             group_flag=0;
             _strline.str("");
         }
-        if(ch == '=')//һ¸������鿪ʼ , ¼ډ鐡ةo²»ՙǶ͗ 
+        if(ch == '=')//һ¸������鿪ʼ , ¼ډ鐡ةo²»ՙǶ͗ 
         {
             if((int)_strline.str().find("servers",0) != -1)
             {
@@ -191,7 +191,7 @@ int dns_conf::parse_white_conf()
         }
         if(servers_flag == 1)//½㏶serversСة
         {
-            if (new_flag == 0)//ֻ½������´
+            if (new_flag == 0)//ֻ½������´
             {
                 ip_obj* str_new_p = new ip_obj;
 		str_new_p->group_id = group1;
@@ -205,7 +205,7 @@ int dns_conf::parse_white_conf()
             {
                 ref_num++;
                 if(ref_num == 1)
-                    _strline.str("");//µے»¸������������´ȥ¿ԟstrline
+                    _strline.str("");//µے»¸������������´ȥ¿ԟstrline
                 continue;
             }
             if (ref_num == 2)
@@ -221,7 +221,7 @@ int dns_conf::parse_white_conf()
                 _strline.str("");
                 ref_num = 0;
             }
-            if(ch == '}')    //һ¸������鶄½⋸±떾.µ«ˇɧ¹������͗ Ň¾͵Đ޸Ł
+            if(ch == '}')    //һ¸������鶄½⋸±떾.µ«ˇɧ¹������͗ Ň¾͵Đ޸Ł
             {
                 servers_flag = 0;
                 _strline.str("");
@@ -234,7 +234,7 @@ int dns_conf::parse_white_conf()
             {
                 ref_num++;
                 if(ref_num == 1)
-                    _strline.str("");//µے»¸������������´ȥ¿ԟstrline
+                    _strline.str("");//µے»¸������������´ȥ¿ԟstrline
                 continue;
             }
             if (ref_num == 2)
@@ -410,3 +410,6 @@ int dns_conf::in_head(char* str_domain,int len, int* gid) {
     */
     return 0;	
 }
+//我的配置规则是 比如白名单 *.com 这个*可以带有很多点 也就是说*.com包含了世界上所有com顶级域名
+//那么这样的话会有一个问题比如 *.xigua.com 确实配了 但不想服务诸如ad1.*.xigua.com sport.*.xigua.com这种 
+//
