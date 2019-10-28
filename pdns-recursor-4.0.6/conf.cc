@@ -340,7 +340,8 @@ int dns_conf::check(char* str_domain, int len, int* gid) {
 	        *gid = iter->second->group_id; //group_id´ѱ¿ªʼ
         }
     }
-    if (head_flag == 1) {
+    //if (head_flag == 1) {
+    if (1) {
         int ret = in_head(str_domain,len,gid);    
         if( 1 == ret ) {
             return 3;
