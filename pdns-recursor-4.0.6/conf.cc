@@ -344,20 +344,18 @@ int dns_conf::check(char* str_domain, int len, int* gid) {
     }
     //if (head_flag == 1) {
     if (1) {
-        int ret = in_head(str_domain,len,gid);    
-        if( 1 == ret ) {
+        if( 1 == in_head(str_domain,len,gid) ) { //black
             return 3;
         }
     }
   
     if (rear_flag == 1) { 
-        int ret1 = in_rear(str_domain,gid);
-        if( 1 == ret1 ) {
+        if( 1 == in_rear(str_domain,gid) ) { //black
             return 5;
         }
     }
 	
-    if(gid > 0 && tmp_gid >= 0) {
+    if(*gid >= 0 && tmp_gid >= 0) {
          *gid = tmp_gid;
     } 
 	
