@@ -331,6 +331,7 @@ int dns_conf::ipv6_button_check(std::string button)
 }
 
 int dns_conf::check(char* str_domain, int len, int* gid) {
+    int tmp_gid = -2;  //优先匹配精准域名
     __gnu_cxx::hash_map<char*, ip_obj*,__gnu_cxx::hash<char*>,hm_strcmp1>::iterator iter;
     if ( ( iter = str_domain_hash.find(str_domain)) != str_domain_hash.end() ) { //¾«׼ԲĻƐ¶
         if (iter->second->group_id == -1) { //ºھ«׼ԲĻµépةΪ-1
@@ -338,6 +339,7 @@ int dns_conf::check(char* str_domain, int len, int* gid) {
             return 1;
         } else if (iter->second->group_id > 0 && iter->second->group_id <= (int)str_servers.size()) {
 	        *gid = iter->second->group_id; //group_id´ѱ¿ªʼ
+		tmp_gid = *gid;
         }
     }
     //if (head_flag == 1) {
@@ -347,12 +349,18 @@ int dns_conf::check(char* str_domain, int len, int* gid) {
             return 3;
         }
     }
-    if (rear_flag == 1) {
+  
+    if (rear_flag == 1) { 
         int ret1 = in_rear(str_domain,gid);
         if( 1 == ret1 ) {
             return 5;
         }
     }
+	
+    if(gid > 0 && tmp_gid >= 0) {
+         *gid = tmp_gid;
+    } 
+	
     return 0;		
 }
 
