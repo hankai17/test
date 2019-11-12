@@ -13,7 +13,7 @@ func main() {
 */
 
 /*
-type myLocker struct { //用匿名方式把原有类型嵌入/代理其中  //Go语言中的继承是通过内嵌或组合来实现的
+type myLocker struct { //用匿名方式把原有类型嵌入/代理其中  //Go语言中的继承是通过 内嵌/嵌入/代理/组合来实现的
     sync.Mutex //看golang包 mutex是个结构体
 } 
 func main() {
