@@ -1,6 +1,15 @@
 # .bashrc
 
 # User specific aliases and functions
+set encoding=utf-8 
+set fileencodings=utf-9,cp936
+set ts=4
+set expandtab
+set autoindent
+set smartindent
+set shiftwidth=4
+set softtabstop=4
+#vim tab键4个空格 ggG
 
 alias rm='rm -i'
 alias cp='cp -i'
