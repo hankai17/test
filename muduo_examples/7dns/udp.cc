@@ -181,3 +181,17 @@ int main(int argc, char* argv[])
         printf("Usage:\n%s -s port\n%s ip port\n", argv[0], argv[0]);
     }
 }
+
+/*
+cmake_minimum_required(VERSION 3.12)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+
+include_directories("/home/file/muduo-master")
+add_executable(udp /home/file/muduo-master/examples/udp/udp.cc)
+target_link_libraries(udp 
+    /home/file/build/release-install-cpp11/lib/libmuduo_net.a 
+    /home/file/build/release-install-cpp11/lib/libmuduo_base.a 
+    /home/file/build/release-install-cpp11/lib/libmuduo_http.a 
+    pthread)
+*/
