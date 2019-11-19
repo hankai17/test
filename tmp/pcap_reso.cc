@@ -5,6 +5,7 @@
 #include "mydef.h"
 
 //curr_pos must in ETH before call this fun
+//after call this fun curr_pos must in udp data
 int process_E_I_U(FILE* pFile, unsigned short* data_len) {
     //printf("=============================>\n");
     //0 Now at ETH_HEADER
@@ -32,51 +33,36 @@ int process_E_I_U(FILE* pFile, unsigned short* data_len) {
     return 0;
 }
 
+int pcap_check_magic() {
+    return 0;
+}
+
 int open_pcapfile(char* filepath, char* desc_error) {
         FILE * pFile = NULL;
+    unsigned short udp_len;
+    unsigned char buf[1024 * 4]={0};
+
         pFile = fopen(filepath, "r");
         if(!pFile) {
                 strcpy(desc_error, "fopen err");
                 return -1;
         }
+
+    /*
         UINT16 file_head_len = sizeof(PCAPFILEHEAD);
         PCAPFILEHEAD pfileHead;
-
     fread((char*)&pfileHead, sizeof(PCAPFILEHEAD), 1, pFile);
     printf("pfileHead.magic: %x\n", pfileHead.magic);
     printf("pfileHead.majorVer: %x\n", pfileHead.majorVer);
-    printf("pfileHead.minorVer: %x\n", pfileHead.minorVer);
-    printf("--------------------> begin read \n");
+    */
 
     int offset = 0;
     if(fseeko(pFile, 40, SEEK_SET) < 0) {
         fclose(pFile);
         return -1; 
-    }
-    //Now at ETH_HEADER
+    } //Now at ETH_HEADER
 
-    if(fseeko(pFile, 40 + 14 + 20 + 4, SEEK_SET) < 0) {
-        fclose(pFile);
-        return -1; //Now at UDP len
-    }
-
-    unsigned char udp_len_h;
-    unsigned char udp_len_l;
-    fread(&udp_len_h, sizeof(unsigned char), 1, pFile);
-    fread(&udp_len_l, sizeof(unsigned char), 1, pFile);
-    unsigned short udp_len = udp_len_h * 256 + udp_len_l;
-    printf("udp_len: %d\n", udp_len);
-    udp_len -= 8; //104 - 8 = 96
-
-    if(fseeko(pFile, (int)ftello(pFile) + 2, SEEK_SET) < 0) {
-        fclose(pFile);
-        return -1; //Now at UDP data
-    }
-
-    int pcap_size = 1000000;
-    unsigned char buf[1024 * 4]={0};
-    int  blockSize = sizeof(buf);
-    int writelen = 0;
+    process_E_I_U(pFile, &udp_len);
     
     for(;;) {
         if(udp_len > 0) {
@@ -111,5 +97,3 @@ int main() {
     }
     return 0;
 }
-
-
