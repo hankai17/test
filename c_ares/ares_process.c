@@ -250,7 +250,7 @@ static void process_answer(ares_channel channel, unsigned char *abuf, int alen, 
 
   /* Grab the query ID, truncate bit, and response code from the packet. */
   id = DNS_HEADER_QID(abuf);
-  tc = DNS_HEADER_TC(abuf);
+  tc = DNS_HEADER_TC(abuf); //truc标志
   rcode = DNS_HEADER_RCODE(abuf);
 
   /* Find the query corresponding to this packet. */
@@ -266,12 +266,12 @@ static void process_answer(ares_channel channel, unsigned char *abuf, int alen, 
    * don't accept the packet, and switch the query to TCP if we hadn't
    * done so already.
    */
-  if ((tc || alen > PACKETSZ) && !tcp && !(channel->flags & ARES_FLAG_IGNTC))
+  if ((tc || alen > PACKETSZ) && !tcp && !(channel->flags & ARES_FLAG_IGNTC)) //如果包里明确有trunc 或 包长大于512字节 
     {
       if (!query->using_tcp)
 	{
 	  query->using_tcp = 1;
-	  ares__send_query(channel, query, now);
+	  ares__send_query(channel, query, now);  //在收到trunc响应包后 立即用tcp请求 跟pdns一致
 	}
       return;
     }
