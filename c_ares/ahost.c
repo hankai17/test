@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   while (1) {
       FD_ZERO(&read_fds);
       FD_ZERO(&write_fds);
-      nfds = ares_fds(channel, &read_fds, &write_fds);
+      nfds = ares_fds(channel, &read_fds, &write_fds); //非常之简单 永远只有两个文件描述符udp的那个socket 跟 tcp的那个socket
       //if (nfds == 0) break;
       if (nfds == 0) continue;
       tvp = ares_timeout(channel, NULL, &tv);
