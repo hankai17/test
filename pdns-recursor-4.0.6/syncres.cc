@@ -184,7 +184,7 @@ int SyncRes::beginResolve(const DNSName &qname, const QType &qtype, uint16_t qcl
   if( (qtype.getCode() == QType::A || qtype.getCode() == QType::AAAA) && groupid > 0 )
  {
   ret.clear();
-  DNSRecord rr;
+  DNSRecord rr; //可以加addition资源 "DNSResourceRecord::ADDITIONAL"
   rr.d_name = qname;
   rr.d_type = qtype.getCode();
   rr.d_place = DNSResourceRecord::ANSWER;
