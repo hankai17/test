@@ -1,0 +1,1 @@
+cmake  .. -DBUILD_SHARED_LIBS=ON  //eg yaml-cpp install
