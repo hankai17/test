@@ -7,8 +7,8 @@ int main() {
   }
 
   std::vector<int> v { 1, 2, 3, 4, 5, 6 };
-  for (auto& elem : v ) {  
-	//for ( auto elem : v ) { //拷贝成临时变量
+  for (auto& elem : v ) {  //非只读方式 可以修改原来值
+	//for ( auto elem : v ) { //拷贝成临时变量 即只读的方式即做任何操作都不会改变原来的值
 	elem *= 3;
   }
 
