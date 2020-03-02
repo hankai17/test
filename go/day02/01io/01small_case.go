@@ -60,10 +60,12 @@ func demo1() {
 		fmt.Printf("%s\n", outputBuf0.String())
 	} else { //直接读到一个带缓冲器的容器中(带缓冲器的读取器bufio 默认4096字节长度)
 		outputBuf0 := bufio.NewReader(stdout0) //stdout0的值也是io.Reader类型 so可以直接作为bufio的参数
-		output0, _, err := outputBuf0.ReadLine() //从读取器中读一行 //第二个参数为false 意为当前行未读完
-		if err != nil {
-			fmt.Printf("Error: Can not read data from the pipe: %s\n", err)
-			return
+		for {
+			output0, _, err := outputBuf0.ReadLine() //从读取器中读一行 //第二个参数为false 意为当前行未读完
+			if err != nil {
+				fmt.Printf("Error: Can not read data from the pipe: %s\n", err)
+				return
+		     }
 		}
 		fmt.Printf("%s\n", string(output0))
 	}
