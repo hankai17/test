@@ -612,3 +612,19 @@ mkdir empty && rsync -r --delete empty/ some-dir && rmdir some-dir
 [![Creative Commons License](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
 
 本文使用授权协议 [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/)。
+
+## 
+1. #!/usr/bin/env bash
+
+remote_get_content() {
+    if curl --version >/dev/null 2>&1
+    then
+        curl -fsSL "$1"
+    elif wget --version >/dev/null 2>&1
+    then
+        wget "$1" -O -
+    fi
+}
+
+bash <(remote_get_content https://cdn.jsdelivr.net/gh/xmake-io/xmake@master/scripts/get.sh) $@
+
