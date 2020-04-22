@@ -34,3 +34,13 @@ target_link_libraries(sudoku_loadtest /home/file/build/release-install-cpp11/lib
 #add_executable(sudoku_stat_unittest stat_unittest.cc)
 #target_link_libraries(sudoku_stat_unittest muduo_base boost_unit_test_framework)
 #endif()
+
+LINK_LIBRARY似乎是一个需要避免的命令, 取而代之的是FIND_LIBRARY, 其基本用法是
+#在指定目录下搜索一个库, 保存在变量MY_LIB中
+FIND_LIBRARY(MY_LIB libmylib.a ./)
+#链接这个库
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${MY_LIB})
+
+eg:
+find_library(my_sylar libmy_sylar.so /root/CLionProjects/my_sylar/cmake-build-debug/)
+set(LIBS ${my_sylar} ...
