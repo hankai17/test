@@ -140,5 +140,6 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #date -d @1566760483
 #date -d "Thu, 15 Aug 2019 08:28:10" +%s
 #seq 1 100 | while read i; do dig +short www.baidu.com; done
+# ps -eo pid,lstart,etime,cmd | grep ppc
 
 
