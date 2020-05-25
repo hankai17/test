@@ -1,0 +1,101 @@
+template<typename ...T>
+class mytuple;
+
+//偏特化版本
+template<typename HEAD, typename ...TLIST>
+class mytuple<HEAD, TLIST...> : public mytuple<TLIST...>
+{
+public:
+    mytuple(HEAD head, TLIST... args) : mytuple<TLIST...>(args...), value(head)
+    {
+    }
+
+    HEAD value;
+};
+
+//结束条件，特化版本
+template<>
+class mytuple<>
+{
+};
+
+mytuple<int, char, float>的对象内存模型
+
++-----------+
+|     f     |
+|____float__|
+|     c     |
+|____char___|
+|     i     |
+|____int____|
+
+
+tuple正是利用这种递归继承形成的对象一层层存储不同类型数据的 如何像标准库函数一样把它里面的元素get出来呢？看一下下面的代码
+
+template<int N, typename ...T>
+struct mytupleat;
+
+//类模板偏特化
+template<int N, typename T, typename ...TLIST>
+struct mytupleat<N, mytuple<T, TLIST...> >
+{
+    static_assert(sizeof...(TLIST) >= N, "wrong index");
+    typedef typename mytupleat<N - 1, mytuple<TLIST...> >::value_type value_type;
+    typedef typename mytupleat<N - 1, mytuple<TLIST...> >::tuple_type tuple_type;
+};
+
+//类模板偏特化
+template<typename T, typename ...TLIST>
+struct mytupleat<0, mytuple<T, TLIST...> >
+{
+    typedef T value_type;
+    typedef mytuple<T, TLIST...> tuple_type;
+};
+///////////////////////////////////////////////////////////////////////////
+template<int N, typename HEAD, typename ...TLIST>
+typename mytupleat<N, mytuple<HEAD, TLIST...> >::value_type
+mygettuple(mytuple<HEAD, TLIST...> tuple)
+{
+    typedef typename mytupleat<N, mytuple<HEAD, TLIST...> >::value_type VALUE;
+    typedef typename mytupleat<N, mytuple<HEAD, TLIST...> >::tuple_type TUPLE;
+    VALUE ret = ((TUPLE) tuple).value;
+    return ret;
+}
+///////////////////////////////////////////////////////////////////////////
+class TestMyTuple
+{
+public:
+    static void execute()
+    {
+        mytuple<int, double, const char *> test(12, 13.12, "123");
+
+        auto ntest = mygettuple<0>(test);
+        auto dtest = mygettuple<1>(test);
+        auto csztest = mygettuple<2>(test);
+
+        mytuple<int> test2(22);
+        auto ntest2 = mygettuple<0>(test2);
+    }
+};
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+bind实现
+ static void execute()
+    {
+        auto f = std::bind([](int a, char b, const char *c)
+                           {
+                               std::cout << "bindtest:" << a << b << c << std::endl;
+                           }, 1, 'a', "abc");
+        f();
+    }
+bind设计核心问题是 1如何将不定参数存储起来 2调用的时候如何按参数顺序将之前存储的参数展开传给函数
+看不懂了
+
+    
+
+
+
+
+Referer https://www.jianshu.com/p/d22904f30930
