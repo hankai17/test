@@ -17,6 +17,14 @@ func demo1() {
 
 	stdout0, err := cmd0.StdoutPipe() //stdout0是io.ReadCloser类型 这是个接口类型并扩展了接口类型io.Reader so就可以调用Read方法获取输出了
 	/*
+	 疑问: 读接口 意思是读buf里的数据 还是把数据写到buf里 很混乱 还是看源码吧
+	 
+	exec.go:func (c *Cmd) StdoutPipe() (io.ReadCloser, error) {
+	...
+	pr, pw, err := os.Pipe()
+	return pr, nil  返出的是管道的读端
+	 }
+	
 	 src/io/io.go源码包里看这个返回值类型
 	 ReadCloser is the interface that groups the basic Read and Close methods.
 	 126  type ReadCloser interface {
