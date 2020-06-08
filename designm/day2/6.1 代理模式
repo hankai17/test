@@ -1,0 +1,92 @@
+class Animal {
+ public:
+    virtual void say () const = 0;
+    virtual Animal* copy() const = 0;
+    virtual Animal* move() = 0;
+    virtual ~Animal() {}
+};
+
+class Cat: public Animal {
+ public:
+    void say() const {
+        std::cout << "Meow~ I'm a cat." << std::endl;
+    }
+
+ public:
+    Cat() {}
+    ~Cat() override { valid_cat_ = false; }
+    Cat(const Cat& source) : valid_cat_{source.valid_cat_} {}
+    Cat(Cat&& source) : valid_cat_{source.valid_cat_} { source.valid_cat_ = false; }
+    Cat& operator=(const Cat& source) {
+        this->valid_cat_ = source.valid_cat_;
+    }
+    Cat& operator=(Cat&& source) {
+        this->valid_cat_ = source.valid_cat_;
+        source.valid_cat_ = false;
+    }
+    Animal* copy() const override {
+        return dynamic_cast<Animal*>(new Cat(*this)); // 拷贝构造 产生一个新元素
+    }
+    Animal* move() override {
+        return dynamic_cast<Animal*>(new Cat(std::move(*this)));
+    }
+
+ private:
+    bool valid_cat_{true};
+};
+
+class Dog: public Animal {
+    ...
+};
+
+class AnimalSurrogate {
+ public:
+    AnimalSurrogate() {}
+    explicit AnimalSurrogate(const AnimalSurrogate& animal_surrogate) :
+        animal_{animal_surrogate.animal_ ? animal_surrogate.animal_->copy() : nullptr} {}
+    explicit AnimalSurrogate(AnimalSurrogate&& animal_surrogate) :
+        animal_{animal_surrogate.animal_ ? animal_surrogate.animal_->move() : nullptr} {
+        animal_surrogate.animal_ = nullptr;
+    }
+    AnimalSurrogate& operator=(const AnimalSurrogate& animal_surrogate) {
+        animal_ = animal_surrogate.animal_ ? animal_surrogate.animal_->copy() : nullptr;
+        return (*this);
+    }
+    AnimalSurrogate& operator=(AnimalSurrogate&& animal_surrogate) {
+        animal_ = animal_surrogate.animal_ ? animal_surrogate.animal_->move() : nullptr;
+        animal_surrogate.animal_ = nullptr;
+        return (*this);
+    }
+    ~AnimalSurrogate() {
+        delete animal_;
+        animal_ = nullptr;
+    }
+
+ public:                       
+    AnimalSurrogate(const Animal& animal) : animal_{animal.copy()} {}
+                                                          // 虚基类不存在对象 如果声明为 explicit，则每次使用都必须使用 dynamic_cast 进行显式的类型转换
+                                                          // 定义被包装的原始对象的 拷贝构造
+    AnimalSurrogate(Animal&& animal) : animal_{animal.move()} {}
+    AnimalSurrogate& operator=(const Animal& animal) {
+        this->animal_ = animal.copy();
+        return (*this);
+    }
+    AnimalSurrogate& operator=(Animal&& animal) {
+        this->animal_ = animal.move();
+        return (*this);
+    }
+
+ public:
+    void say() const {
+        animal_->say();
+        return;
+    }
+
+ private:
+    Animal* animal_{nullptr};
+};
+
+// 我们就实现了在同一容器中，（间接地）容纳不同类型的实例；同时在保留多态的情况下，避免让程序员手动分配和释放内存。
+// 就是在代理类里 封装了一下子类指针而已
+
+
