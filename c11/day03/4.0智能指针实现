@@ -1,0 +1,272 @@
+effective c++告诉我们 一旦有资源就封装成对象 目的是为了释放资源 Resource Acquisition Is Initialization RAII 
+auto_ptr有一个特性 当调用copying函数时 他们会变成null 而复制所得的指针将获得资源的唯一拥有权 这就确保了没有一个以上的auto_ptr同时执行同一内存块 这虽好 但是又不好 因为stl容器里想多存放一份指针以便后续操作比如我的conf.cc文件 这便出现了引用计数智能指针
+reference-counting smart pointer RCSP  智能指针不能处理环状引用 飞哥遇到过 沪指则意为被使用状态
+注意auto_ptr和shared_ptr都是在析构内做delete而非delete[]动作 所以不要用于array 所以用vector代替
+
+把资源给“灌装”起来(共享指针 生成对象) 有一定的局限性 所以要自定义资源管理类
+为了防止资源泄露 请使用RAII对象 他们在构造函数中获得资源并在析构中释放资源
+两个常备使用的RAII类是 shared_ptr和auto_ptr 前者最佳copy行为比较直观 若选择后者复制动作会使它指向null
+
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//autoptr伪代码 
+AutoPtr(AutoPtr<T>& ap)//拷贝构造函数  
+        :_ptr(ap._ptr) {  
+        ap._ptr = NULL;  
+}  
+  
+AutoPtr<T>& operator=(AutoPtr<T>& ap)//赋值运算符重载 {  
+    if (this != &ap)  {  
+        if (_ptr)  {  
+            delete _ptr;  
+        }  
+        _ptr = ap._ptr;  
+        ap._ptr = NULL;  
+    }  
+    return *this;  
+} 
+
+~AutoPtr()//析构函数 {  
+    if (_ptr)  {  
+        delete _ptr;  
+        _ptr = NULL;  
+    }  
+}
+1 一块堆上的内存不能被两个智能指针同时指向(这个就是所有权和管理权的问题)  如果两个智能指针同时指向的话 析构时导致堆空间内存被释放两次
+2 在auto_ptr的实现机制中 采用的是delete(调析构函数 然后再释放内存) 所以auto_ptr所管理的对象必须是new出来的 不能是malloc出来的 
+3 auto_ptr不能管理数组 因为析构调用的是delete
+4 较普通指针优点是:普通指针在new和delete之间发生异常 如果我不捕获异常 就不会执行delete 那么这片内存就不能被回收 这就是RAII
+
+
+ 
+//这种将一块空间的权限完全交给别人的方法 不好
+//假设调用了拷贝构造函数 我们的本意是用一个对象去构造一个与之一模一样的对象 可是结果我们把自己给弄丢了 完全没有达到我们预期的目标 如果我们想再次构造出来的对象的内容时(想想那个double print函数) 会发现对象的资源已经被清理了 所以会导致程序崩溃
+//再如 sort的快排实现中将元素复制到某个局部临时对象中 但对于auto_ptr却将原元素置null 这就导致最后的排序结果中可能有大量的null
+//资源转移通常只会在特定的场合发生(一般情况下都是拷贝) 例如转移一个临时变量(右值)给某个named variable（左值）或者一个函数的返回(右值) 
+
+https://blog.csdn.net/qq_34992845/article/details/68939527  //里面分析有源码 没看懂
+ 
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+ unique_ptr又叫scoped_ptr auto_ptr因为转移资源及转交权限从而引发一系列问题 根源就是拷贝构造和赋值运算符重载函数导致 这个智能指针就是禁止两者 本质上来说unique_ptr禁用了copy用move替代
+实现起来也比较简单
+private :  
+    ScopedPtr(const ScopedPtr& ap);//拷贝构造函数声明  
+    ScopedPtr& operator=(const ScopedPtr& ap);//赋值运算符重载函数声明  
+使得对象所有函数外部均无法使用
+
+基本用法:
+    std::unique_ptr<A> up1; 
+    up1.reset(new A(3)); //销毁内部对象并接受新对象的所有权(若缺省参数即没有任何对象所有权 此时仅将内部对象释放并置空)
+    std::unique_ptr<A> up2(new A(4));
+
+    A* p = up2.release(); //放弃内部对象的所有权 将内部指针置为空 返回内部对象的指针 此指针需要手动释放
+    delete p;
+/*
+    unique_ptr<int> pInt(new int(5));
+    unique_ptr<int> pInt2(pInt); //报错
+    unique_ptr<int> pInt3 = pInt; //报错
+*/
+
+    std::unique_ptr<A> up3(new A(11));
+    std::unique_ptr<A> up4 = std::move(up3); //unique_ptr虽然不支持拷贝、赋值操作 但提供移动机制来将指针的所有权从一个unique_ptr转移给另一个unique_ptr 如果需要转移所有权可以使用std::move()函数 注意此时up3已为空！！！
+    up4 = nullptr;//显式销毁所指对象 同时智能指针变为空指针 与u_s2.reset()等价
+
+    //可以拷贝或赋值一个将亡unique_ptr 
+    unique_ptr func1(int a) {  
+        return unique_ptr<int> (new int(a));  
+    }  
+
+
+//get 获得内部对象的指针 由于重载了()方法因此和直接使用对象是一样的 如unique_ptr<int> sp(new int(1)); sp与sp.get()是等价的
+//swap 交换两个对象(即交换所拥有的对象)
+
+//优点 在容器中保存指针 https://www.cnblogs.com/DswCnblog/p/5628195.html
+    vector<unique_ptr<int>> vec;
+    unique_ptr<int> p(new int(5));
+    vec.push_back(std::move(p)); //使用移动语义
+
+
+
+
+
+scoped_ptr的所有权是从一而终的 auto_ptr则允许用户以很自然的方式转交资源两者的设计理念都保证同一时刻所有权持有者唯一
+auto_ptr的好处是显而易见的 比如用vector保存智能指针时由于大量元素操作涉及资源转移 scoped_ptr完全没法用 然而其设计上的最大问题在于让一切赋值行为变成了资源转交 这一点不符合最小惊讶原则 你很难一上来就接受原件被“拷贝”以后会失效这件事 所以C++11使用unique_ptr代替auto_ptr 除非在自身即将消亡的时候 资源的转交只能通过另一成员release显式完成。总而言之，auto_ptr最大的弊端在于允许很多几乎没有实际用处又不符合常规认知的行为 用scoped_ptr和unique_ptr可以利用静态检查早早地指出这些无意义操作的存在
+
+
+https://stackoverflow.com/questions/5026197/what-c-smart-pointer-implementations-are-available
+//auto_ptr和unique_ptr都只能一个智能指针引用对象 而shared_ptr则是可以多个智能指针同时拥有一个对象 实现方式就是引用计数 多个智能指针同时引用一个对象 每引用一次引用计数加一 每当智能指针销毁了引用计数就减一 当引用计数减少到0时就释放引用对象 这种引用计数的增减发生在智能指针的构造函数 复制构造函数 赋值操作符 析构函数中 这种方式使得多个智能指针同时对所引用的对象有拥有权 同时在引用计数减到0之后也会自动释放内存 也实现了auto_ptr和unique_ptr的资源释放的功能
+https://blog.csdn.net/zsc_976529378/article/details/52250597
+
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//插个题外话
+A get_A() {
+    return A();
+}
+
+int main() {
+    //A a = get_A(); 默认调用两次拷贝构造 第一次是必须的拷贝成匿名对象 
+    //A&& a = get_A(); 调用一次拷贝构造 第一次拷贝成匿名对象 然后直接转正
+    return 0;
+}
+//返回一个元素必须得拷贝 这就有损性能 so便有了move
+A(A&& a) :m_ptr(a.m_ptr) { //直接转移控制权限！！！                                          
+    std::cout<<"move construct"<<std::endl;
+    a.m_ptr = nullptr;                     
+}                                          
+
+
+
+//先看一下ats中的
+class RefCountObj : public ForceVFPTToTop {
+public:
+  RefCountObj() : m_refcount(0) {}
+  RefCountObj(const RefCountObj &s) : m_refcount(0) {
+    (void)s;
+    return;
+  }
+  virtual ~RefCountObj() {}
+  RefCountObj &operator=(const RefCountObj &s) {
+    (void)s;
+    return (*this);
+  }
+
+  int refcount_inc();
+  int refcount_dec();
+  int refcount() const;
+
+  virtual void free() {
+    delete this;
+  }
+  volatile int m_refcount;
+};
+
+template <class T> class Ptr {
+public:
+  explicit Ptr(T *p = 0);
+  Ptr(const Ptr<T> &);
+  ~Ptr();
+
+  T* to_ptr() {
+    if (m_ptr && m_ptr->m_refcount == 1) {
+      T *ptr = m_ptr;
+      m_ptr = 0;
+      ptr->m_refcount = 0;
+      return ptr;
+    }
+    return 0;
+  }
+    
+  void clear();
+  Ptr<T> &operator=(const Ptr<T> &);
+  Ptr<T> &operator=(T *);
+  operator T *() const { return (m_ptr); }
+  T *operator->() const { return (m_ptr); }
+  T &operator*() const { return (*m_ptr); }
+
+  int operator==(const T *p) { return (m_ptr == p); }
+  int operator==(const Ptr<T> &p) { return (m_ptr == p.m_ptr); }
+  int operator!=(const T *p) { return (m_ptr != p); }
+  int operator!=(const Ptr<T> &p) { return (m_ptr != p.m_ptr); }
+
+  RefCountObj * _ptr() {
+    return (RefCountObj *)m_ptr;
+  }
+  T *m_ptr;
+};
+
+// 操作符 ＝ 的重载
+template <class T> inline Ptr<T> &Ptr<T>::operator=(T *p) //参数是等号右边的值 {
+  T *temp_ptr = m_ptr;
+  if (m_ptr == p)
+    return (*this);
+
+  m_ptr = p; //参数赋值给本对象
+
+  if (m_ptr != 0) {
+    _ptr()->refcount_inc(); //如果参数非NULL 参数对象引用计数++
+  }
+  if ((temp_ptr) && ((RefCountObj *)temp_ptr)->refcount_dec() == 0) { //本对象引用计数--
+    ((RefCountObj *)temp_ptr)->free();
+  }
+  return (*this);
+}
+
+template <class T> inline Ptr<T> &Ptr<T>::operator=(const Ptr<T> &src) {
+  return (operator=(src.m_ptr));
+}
+
+
+//分析 
+    Ptr<T> PtrT; //首先我们分配两个实例及一个智能指针Ptr<T> PtrT
+    Proxy *m1 = new_Proxy(); //默认继承ref
+    Proxy *m2 = new_Proxy();
+
+-------------------------------------------------
+    temp_ptr = PtrT->m_ptr;
+    if (m_ptr != p) {
+        PtrT->m_ptr = m1;  
+        if (PtrT->m_ptr) 
+            PtrT->m_ptr->refcount_inc(); 
+        if (temp_ptr && temp_ptr->refcount_dec() == 0) 
+            temp_ptr->free();
+    }
+    return(PtrMutex);
+-------------------------------------------------
+    
+    PtrT.m_ptr = m1 //将m1赋值给它  PtrT.m_ptr的引用计数加1 其实就是m1的引用计数为1了 
+    PtrT.m_ptr = m2 //再将m2赋值给它 PtrT.m_ptr的引用计数加1 其实就是m2的引用计数为1了 temp_ptr的引用计数减 1其实就是m1的引用计数减1变为0了 判断temp_ptr引用计数是否为0 为0调用temp_ptr->free() p被释放回收了
+    PtrT.m_ptr = NULL //temp_ptr暂存m2 为NULL那么引用计数不能增加 temp_ptr的引用计数减1其实就是m2的引用计数减1变为0了 判断temp_ptr的引用计数是否为0为0调temp_ptr->free() m被释放  -----------新+旧-
+    //为什么找不到释放的地方？ 就是在这里！ 根据ref会自动触发具体对象的free()函数
+
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+ shared_ptr是一个标准的共享所有权的智能指针 允许多个指针指向同一个对象
+开销:
+1 shared_ptr对象除了包括一个所拥有对象的指针外 还必须包括一个引用计数代理对象的指针
+2 时间上的开销主要在初始化和拷贝操作上 *和->操作符重载的开销跟auto_ptr是一样
+3 开销并不是我们不使用shared_ptr的理由 永远不要进行不成熟的优化 直到性能分析器告诉你这一点
+
+std::shared_ptr<int> sp1 = std::make_shared<int>(10);
+std::shared_ptr<int> sp2 = std::make_shared<int>(11);
+auto sp3 = sp2; //或auto sp3(sp2);
+printf("sp1.use_count = %d\n", sp1.use_count());  //1
+printf("sp2.use_count = %d\n", sp2.use_count());  //2
+printf("sp3.use_count = %d\n", sp3.use_count());  //2
+sp3 = sp1; //左减右加
+printf("sp1.use_count = %d\n", sp1.use_count());  //2
+printf("sp2.use_count = %d\n", sp2.use_count());  //1
+printf("sp3.use_count = %d\n", sp3.use_count());  //2
+
+std::shared_ptr<int> sp5(new int(22));
+std::shared_ptr<int> sp6 = sp5;
+std::shared_ptr<int> sp7 = sp5;
+printf("%d\n", *sp5);               // 22
+printf("%d\n", *sp6);               // 22
+printf("%d\n", *sp7);               // 22
+printf("%d\n", sp5.use_count());    // 3
+printf("%d\n", sp6.use_count());    // 3
+printf("%d\n", sp7.use_count());    // 3
+sp5.reset(new int(33));             //首先生成新对象 然后p5引用计数减1为2 新对象引用计数加一即为1
+printf("%d\n", sp5.use_count());    // 1
+printf("%d\n", sp6.use_count());    // 2
+printf("%d\n", sp7.use_count());    // 2
+printf("%d\n", *sp5);               // 33
+printf("%d\n", *sp6);               // 22
+printf("%d\n", *sp7);               // 22
+
+std::shared_ptr<Person> p1(new Person(1)); //p1的引用计数为1
+std::shared_ptr<Person> p2 = std::make_shared<Person>(2); //p2的引用计数为1
+p1.reset(new Person(3)); //首先生成新对象 然后p1引用计数减1 为0故析构 新对象引用计数加一即为1
+std::shared_ptr<Person> p3 = p1; //p1和p3的引用计数为2
+p1.reset(); //p3的引用计数为1
+p3.reset();//p3的引用计数为0 析构
+
+//https://www.cnblogs.com/jiayayao/archive/2016/12/03/6128877.html  有使用的限制及陷阱
+    
+感觉好复杂啊 https://www.cnblogs.com/diysoul/p/5930361.html
+面试问到的4个智能指针 https://blog.csdn.net/zsc_976529378/article/details/52250597
+
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Refer: https://zhuanlan.zhihu.com/p/32925244
