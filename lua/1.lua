@@ -135,3 +135,23 @@ else
 end
 
 print(string.find("www.net-east.com", "www.net-east.com"))
+
+
+--data, rep_count = "https:\\/\\/mp.weixin.qq.com\\/s?__biz=MzIxNzg1NDg0Nw==\\u0"
+data, rep_count = "https:\\\\/\\\\/mp.weixin.qq.com\\\\/"
+print(data)
+
+data, rep_count = string.gsub(data, "https:\\\\/\\\\/mp.weixin.qq.com", "http:\\\\/\\\\/mp.weixin.qq.com.https.443.pr.net%-east.com")
+print(data)
+
+print("------------------------------------")
+
+uri = "http://www.pr.net-east.com"
+
+if string.find(uri, ".pr.net%-east.com") then
+    print("match ok")
+end
+
+if string.find(uri, "http://www.pr.net-east.com", 1, true) then
+    print("match ok")
+end
