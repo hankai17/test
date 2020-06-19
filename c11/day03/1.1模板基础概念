@@ -1,0 +1,62 @@
+模板并非函数定义，但使用了int的模板实例是函数定义 即实例化之后才算是定义
+隐式实例化
+显式实例化
+显式具体化
+部分具体化
+
+如果有多个模板可供选择，编译器将使用具体化程度最高的模板
+// ------------------------------------------------------------------------------
+/*** 以下代码参考了 luaTinker 中 关于模板的使用 **/
+#include <iostream>  
+using namespace std;  
+
+// "if_<bool, A, B>":类型选择模板(使用模板来实现,根据参数不同匹配不同的模板)
+template<bool C, typename A, typename B> 
+struct if_ {};
+
+// 模板具体化(相对于一般模板，有更高的优先调用级；如果和具体化模板匹配，则调用具体化模板)
+// 模板的部分具体化(模板的参数依然是三个，只不过第一个参数被默认指定而已)
+template<typename A, typename B>         
+struct if_<true, A, B> {typedef A type;};    // first place
+
+template<typename A, typename B>         
+struct if_<false, A, B> {typedef B type;};    // second place
+
+int main() 
+{    
+    if_<true, char, double>::type bb; // 直接匹配 first place 位置部分具体化模板函数
+    cout << " the sizeof(bb) is = " << sizeof(bb) << endl;
+    
+    if_<false, char, double>::type cc; // 直接匹配 second place 位置部分具体化模板函数
+    cout << " the sizeof(cc) is = " << sizeof(cc) << endl;
+    
+    /*下面使用两个参数会报 参数不匹配 错误
+     *    if_<char, int>::type dd;
+     *     cout << " the sizeof(dd) is = " << sizeof(dd) << endl;
+     */
+    return 0;
+}
+
+// output -------------------------------------------------------------------------
+ the sizeof(bb) is = 1
+ the sizeof(cc) is = 8
+
+编译器选择使用哪个函数版本：
+  可以参考《函数模板和普通函数在一起调用规则研究.cpp》 
+  这个过程称为重载解析(overloading resolution)
+  候选函数列表 隐士转换 最佳匹配
+  
+可变模板参数
+  ...
+
+模板类与友元
+  ...
+  
+模板全特化 偏特化
+  模板特化是通过"给模板中的所有模板参数一个具体的类"的方式来实现的.而模板偏特化则是通过"给模板中的部分模板参数以具体的类,而留下剩余的模板参数仍然使用原来的泛化定义"的方式来实现的;
+  模板特化/全特化是指给每一个模板参数一个具体的类型,以具体实现这个模板,而且template后面的尖括号中不带任何内容;
+  模板偏特化是指只给部分模板参数一个具体的类型,来实现这个模板;
+
+
+Refer: https://www.cnblogs.com/yyxt/category/772515.html
+Refer: 《C++ Primer Plus（第六版）》 《Effective C++》
