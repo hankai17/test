@@ -50,4 +50,5 @@ void A::doSomething(){
 }
 
 Refer: https://blog.csdn.net/lihao21/article/details/47610309
+Refer: java13种设计模式 https://www.cnblogs.com/boshen-hzb/p/10246144.html
 
