@@ -141,6 +141,6 @@ export PATH=$PATH:$GOPATH:/usr/local/go/bin
 #date -d "Thu, 15 Aug 2019 08:28:10" +%s
 #seq 1 100 | while read i; do dig +short www.baidu.com; done
 # ps -eo pid,lstart,etime,cmd | grep ppc
-# https://centos.pkgs.org/7/centos-x86_64/tcl-8.5.13-8.el7.x86_64.rpm.html
+# https://centos.pkgs.org/7/centos-x86_64/tcl-8.5.13-8.el7.x86_64.rpm.html  http://mirror.centos.org/centos/7/os/x86_64/Packages/tcl-8.5.13-8.el7.x86_64.rpm
 
 
