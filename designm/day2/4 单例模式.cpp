@@ -11,15 +11,15 @@ A() {
     };
     */
 /*
-һ��ĳ����ֻ����һ��ʵ����
-�������������д������ʵ����
-��������������������ϵͳ�ṩ���ʵ����
+一是某个类只能有一个实例；
+二是它必须自行创建这个实例；
+三是它必须自行向整个系统提供这个实例。
 */
 /*
-����ģʽ��ʹ�ò��裺
-a)	 ���캯��˽�л���// Ϊ����������ⲿ�ٴ���һ�������ʵ��
-b)	 �ṩһ��ȫ�ֵľ�̬������ȫ�ַ��ʵ㣩����ȡ��������
-c)	 �����ж���һ����ָ̬�룬ָ����ı����ľ�̬����ָ�� ��
+单例模式的使用步骤：
+a)	 构造函数私有化。// 为不让在类的外部再创建一个本类的实例
+b)	 提供一个全局的静态方法（全局访问点）来获取单例对象。
+c)	 在类中定义一个静态指针，指向本类的变量的静态变量指针 。
 */
 class Singleton
 {
@@ -29,28 +29,28 @@ class Singleton
         return instance;
     }
     private:
-    //��������ⲿ�ٴ���ʵ��
+    //不让类的外部再创建实例
     Singleton() {
     }
-    static Singleton* instance;//ָ����Ψһʵ����ָ�롣
+    static Singleton* instance;//指向本类唯一实例的指针。
 };
-//����ʽ  - �ڱ����ڼ���Ѿ�ȷ�����Ψһ��ʵ���ˡ�
-Singleton*  Singleton::instance = new Singleton; //����ڲ�
+//饿汉式  - 在编译期间就已经确定这个唯一的实例了。
+Singleton*  Singleton::instance = new Singleton; //类的内部
 
 
 
-//����ʽ
-//�����������߲���
+//懒汉式
+//当懒汉遇到高并发
 class Singleton2
 {
     public:
     static Singleton2* getInstance()
     {
-        //����
+        //加锁
         if (instance == NULL) {
             instance = new Singleton2;
         }
-        //����
+        //关锁
         return instance;
     }
     private:
@@ -59,7 +59,7 @@ class Singleton2
     static Singleton2 * instance;
 };
 
-//����ʽ�ĳ�ʼ����ʽ
+//懒汉式的初始化方式
 Singleton2 *Singleton2::instance = NULL;
 
 int main(void)
@@ -84,3 +84,4 @@ int main(void)
     }
     return 0;
 }
+https://www.cnblogs.com/xuhuajie/p/11647164.html  懒汉用std::call_once 保证线程安全
