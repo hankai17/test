@@ -3,6 +3,7 @@
  - 韩凯/男/1993 
  - 本科/河南工业大学信息科学与技术系 
  - 工作年限：4年
+ - 英语: 4/6级
  - 技术博客：https://blog.csdn.net/sinat_24820331
  - Github：http://github.com/hankai17
 
